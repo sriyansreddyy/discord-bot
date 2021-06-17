@@ -30,6 +30,15 @@ bot.on('guildMemberAdd', async member => {
   await channel.send("welcome. what should we call you?")
 })
 
+
+const processNickname () => {
+  // send?
+  // validate?
+  // action?
+}
+const processEmail () => {}
+const steps = [processNickname, processEmail]
+
 bot.on('message', async message => {
   const { 
     channel,
@@ -45,12 +54,14 @@ bot.on('message', async message => {
       member.setNickname(content)
       await cleanup(channel)
       await sendWelcomeDirectMessage(member)
+      // process step
+        // determine step 
+        //  
     }
   }
 })
 
 const cleanup = channel => channel.delete()
-
 const sendWelcomeDirectMessage = member => member.send('hi')
 
 bot.login(process.env.TOKEN)
