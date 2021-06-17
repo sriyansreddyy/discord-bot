@@ -31,10 +31,13 @@ bot.on('message', async message => {
     if (sender === onboardee) {
       member.setNickname(content)
       await cleanup(channel)
+      await sendWelcomeDirectMessage(member)
     }
   }
 })
 
 const cleanup = channel => channel.delete()
+
+const sendWelcomeDirectMessage = member => member.send('hi')
 
 bot.login('ODU0OTg4MjcyOTAzNzgyNDEw.YMr74Q.KUDrUKjSdqczN0SWdTKzB3wAsxc')
