@@ -30,8 +30,11 @@ bot.on('message', async message => {
     const sender = author.discriminator
     if (sender === onboardee) {
       member.setNickname(content)
+      await cleanup(channel)
     }
   }
 })
+
+const cleanup = channel => channel.delete()
 
 bot.login('ODU0OTg4MjcyOTAzNzgyNDEw.YMr74Q.KUDrUKjSdqczN0SWdTKzB3wAsxc')
