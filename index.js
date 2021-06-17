@@ -1,5 +1,6 @@
 const Discord = require('discord.js')
 const bot = new Discord.Client()
+require('dotenv').config()
 
 const WELCOME_PREFIX = 'welcome-'
 const ONBOARDING_CATEGORY_ID = '855011722916790272'
@@ -41,4 +42,4 @@ const cleanup = channel => channel.delete()
 
 const sendWelcomeDirectMessage = member => member.send('hi')
 
-bot.login('ODU0OTg4MjcyOTAzNzgyNDEw.YMr74Q.KUDrUKjSdqczN0SWdTKzB3wAsxc')
+bot.login(process.env.TOKEN)

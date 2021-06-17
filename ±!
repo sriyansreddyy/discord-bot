@@ -1,0 +1,13 @@
+only process text channel messages
+
+do not process dms
+
+# Please enter the commit message for your changes. Lines starting
+# with '#' will be ignored, and an empty message aborts the commit.
+#
+# Date:      Thu Jun 17 11:19:40 2021 +0100
+#
+# On branch main
+# Changes to be committed:
+#	modified:   index.js
+#
