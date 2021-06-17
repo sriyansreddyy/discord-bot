@@ -1,12 +1,15 @@
 const Discord = require('discord.js')
 const bot = new Discord.Client()
 
-bot.on('ready', () => {
+bot.on('ready', async () => {
 	console.log(`Logged in as ${bot.user.id}!`)
 });
 
 bot.on('guildMemberAdd', async member => {
-  const channel = await member.guild.channels.create(`welcome-${member.user.discriminator}`)
+  const parent = '855011722916790272'
+  const channel = await member.guild.channels.create(`welcome-${member.user.discriminator}`, {
+    parent
+  })
   await channel.send("welcome welcome")
 })
 
