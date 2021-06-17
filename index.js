@@ -25,15 +25,16 @@ bot.on('message', async message => {
     content,
     member
   } = message
-  if (channel.name.startsWith(WELCOME_PREFIX)) {
-    const onboardee = channel.name.split("-")[1]
-    const sender = author.discriminator
-    if (sender === onboardee) {
-      member.setNickname(content)
-      await cleanup(channel)
-      await sendWelcomeDirectMessage(member)
+  if (channel.type === "text" 
+    && channel.name.startsWith(WELCOME_PREFIX)) {
+      const onboardee = channel.name.split("-")[1]
+      const sender = author.discriminator
+      if (sender === onboardee) {
+        member.setNickname(content)
+        await cleanup(channel)
+        await sendWelcomeDirectMessage(member)
+      }
     }
-  }
 })
 
 const cleanup = channel => channel.delete()
