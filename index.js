@@ -45,6 +45,9 @@ bot.on('message', async message => {
     const sender = author.discriminator
     if (sender === onboardee) {
 
+      // TODO: determine what question this message is
+      // actually in response to - only then can I reliably
+      // move through the steps
       const messages = await channel.messages.fetch()
       const botMessages = messages
         .filter(message => message.author.id === bot.user.id)
