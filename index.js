@@ -27,7 +27,8 @@ bot.on('guildMemberAdd', async member => {
         }
       ]
     })
-  await channel.send("welcome. what should we call you?")
+  const firstStep = steps[0]
+  await channel.send(firstStep.question)
 })
 
 
@@ -47,7 +48,12 @@ bot.on('message', async message => {
       const messages = await channel.messages.fetch()
       const botMessages = messages
         .filter(message => message.author.id === bot.user.id)
+      const question = botMessages.first().content
+
       const answers = { }
+      answers[question] = content
+      
+      console.log("answers", answers)
 
 
       // member.setNickname(content)

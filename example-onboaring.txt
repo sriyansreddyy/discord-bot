@@ -2,6 +2,8 @@ BOT: Hello, welcome to The Scrimba Discord. What should we call
 you?
 ONBOARDEE: Alex
 BOT: Great! What is your email?
+ONBOARDEE: joe@scrimba.com
+BOT: Sorry, that is not a valid email. Try again?
 ONBOARDEE: alex@scrimba.com
 BOT: Awesome. Watch this video and respond with a ✅ when
 done
