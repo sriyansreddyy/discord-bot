@@ -31,14 +31,6 @@ bot.on('guildMemberAdd', async member => {
 })
 
 
-const processNickname () => {
-  // send?
-  // validate?
-  // action?
-}
-const processEmail () => {}
-const steps = [processNickname, processEmail]
-
 bot.on('message', async message => {
   const { 
     channel,
@@ -51,17 +43,33 @@ bot.on('message', async message => {
     const onboardee = channel.name.split("-")[1]
     const sender = author.discriminator
     if (sender === onboardee) {
-      member.setNickname(content)
-      await cleanup(channel)
-      await sendWelcomeDirectMessage(member)
-      // process step
-        // determine step 
-        //  
+
+      const messages = await channel.messages.fetch()
+      const botMessages = messages
+        .filter(message => message.author.id === bot.user.id)
+      const answers = { }
+
+
+      // member.setNickname(content)
+      // await cleanup(channel)
+      // await sendWelcomeDirectMessage(member)
     }
   }
 })
 
 const cleanup = channel => channel.delete()
 const sendWelcomeDirectMessage = member => member.send('hi')
+
+
+const steps = [
+  {
+    question: "Welcome to the Scrimba Discord, what should we call you?",
+    process: async (answer, member) => await member.setNickname(content)
+  },
+  {
+    question: "Great! And what is your email?",
+    process: () => console.log("email processed")
+  }
+]
 
 bot.login(process.env.TOKEN)
