@@ -27,6 +27,7 @@ bot.on('guildMemberAdd', async member => {
         }
       ]
     })
+
   const firstStep = steps[0]
   await channel.send(firstStep.question)
 })
@@ -45,9 +46,6 @@ bot.on('message', async message => {
     const sender = author.discriminator
     if (sender === onboardee) {
 
-      // TODO: determine what question this message is
-      // actually in response to - only then can I reliably
-      // move through the steps
       const messages = await channel.messages.fetch()
       const botMessages = messages
         .filter(message => message.author.id === bot.user.id)
@@ -57,18 +55,18 @@ bot.on('message', async message => {
       answers[question] = content
       
       // console.log("answers", answers)
-      const index = steps.findIndex(step => step.question === question) + 1
-      const nextQuestion = steps[index].question
-      await channel.send(nextQuestion)
-      // next question?
-      
-      // const question = steps[]
+      const index = steps.findIndex(step => step.question === question)
+      const step = steps[index]
+      step.process(content, member)
+      const nextStep = steps[index + 1]
 
+      if (nextStep) {
+        await channel.send(nextStep.question)
+      } else {
+        await cleanup(channel)
+        await sendWelcomeDirectMessage(member)
+      }
 
-
-      // member.setNickname(content)
-      // await cleanup(channel)
-      // await sendWelcomeDirectMessage(member)
     }
   }
 })
@@ -80,7 +78,7 @@ const sendWelcomeDirectMessage = member => member.send('hi')
 const steps = [
   {
     question: "Welcome to the Scrimba Discord, what should we call you?",
-    process: async (answer, member) => await member.setNickname(content)
+    process: async (answer, member) => await member.setNickname(answer)
   },
   {
     question: "Great! And what is your email?",
