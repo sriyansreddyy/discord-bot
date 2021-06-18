@@ -53,7 +53,14 @@ bot.on('message', async message => {
       const answers = { }
       answers[question] = content
       
-      console.log("answers", answers)
+      // console.log("answers", answers)
+      const index = steps.findIndex(step => step.question === question) + 1
+      const nextQuestion = steps[index].question
+      await channel.send(nextQuestion)
+      // next question?
+      
+      // const question = steps[]
+
 
 
       // member.setNickname(content)
