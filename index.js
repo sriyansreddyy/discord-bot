@@ -5,6 +5,7 @@ require('dotenv').config()
 const WELCOME_PREFIX = 'welcome-'
 const ONBOARDING_CATEGORY_ID = '855011722916790272'
 const EVERYONE_ROLE_ID = '837036811825840129'
+const REGULAR_MEMBER_ROLE_ID = '855434174151262238'
 
 bot.on('ready', async () => {
   console.log(`Logged in as ${bot.user.id}!`)
@@ -32,6 +33,16 @@ bot.on('guildMemberAdd', async member => {
   await channel.send(firstStep.question)
 })
 
+const steps = [
+  {
+    question: "Welcome to the Scrimba Discord, what should we call you?",
+    process: async (answer, member) => await member.setNickname(answer)
+  },
+  {
+    question: "Great! And what is your email?",
+    process: () => console.log("email processed")
+  }
+]
 
 bot.on('message', async message => {
   const { 
@@ -54,7 +65,6 @@ bot.on('message', async message => {
       const answers = { }
       answers[question] = content
       
-      // console.log("answers", answers)
       const index = steps.findIndex(step => step.question === question)
       const step = steps[index]
       step.process(content, member)
@@ -63,6 +73,7 @@ bot.on('message', async message => {
       if (nextStep) {
         await channel.send(nextStep.question)
       } else {
+        await assignRegularMemberRole(member)
         await cleanup(channel)
         await sendWelcomeDirectMessage(member)
       }
@@ -71,19 +82,8 @@ bot.on('message', async message => {
   }
 })
 
+const assignRegularMemberRole = (member) => member.roles.add(REGULAR_MEMBER_ROLE_ID)
 const cleanup = channel => channel.delete()
 const sendWelcomeDirectMessage = member => member.send('hi')
-
-
-const steps = [
-  {
-    question: "Welcome to the Scrimba Discord, what should we call you?",
-    process: async (answer, member) => await member.setNickname(answer)
-  },
-  {
-    question: "Great! And what is your email?",
-    process: () => console.log("email processed")
-  }
-]
 
 bot.login(process.env.TOKEN)
