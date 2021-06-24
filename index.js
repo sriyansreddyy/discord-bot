@@ -36,9 +36,8 @@ bot.on('guildMemberAdd', async member => {
 
   const firstStep = steps[0]
   await channel.send(firstStep.question)
-
-  await processMember(member.id)
 })
+
 
 const steps = [
   {
@@ -46,10 +45,9 @@ const steps = [
     process: async (answer, member) => await member.setNickname(answer)
   },
   {
-    shouldRun: (member)  => true,
     question: `Fantastic. To access the sever, please click this
     link to connect your Scrimba account: https://scrimba.com/discord/connect`,
-    process: () => console.log("email processed")
+    process: (answer, member) => checkIfConnectedOnRepeat(member.id)
   }
 ]
 
@@ -76,7 +74,7 @@ bot.on('message', async message => {
       
       const index = steps.findIndex(step => step.question === question)
       const step = steps[index]
-      step.process(answer, member)
+      await step.process(answer, member)
       const nextStep = steps[index + 1]
 
       if (nextStep) {
@@ -97,13 +95,21 @@ const sendWelcomeDirectMessage = member => member.send('hi')
 
 bot.login(process.env.TOKEN)
 
-const processMember = async discordId => {
-  const { rows }  = await pool.query(`SELECT * FROM USERS WHERE discord_id = '${discordId}'`)
-  const user = rows[0]
-  if (user) {
-    console.log(`${discordId} joined. we already know who this is,`, user)
-  } else {
-    console.log(`${discordId} joined. unknown Scrimba user`, user)
-  }
-  // console.log('rows.length', rows.length)
+// const processMember = async discordId => {
+//   const { rows }  = await pool.query(`SELECT * FROM USERS WHERE discord_id = '${discordId}'`)
+//   const user = rows[0]
+//   if (user) {
+//     console.log(`${discordId} joined. we already know who this is,`, user)
+//   } else {
+//     console.log(`${discordId} joined. unknown Scrimba user`, user)
+//   }
+//   // console.log('rows.length', rows.length)
+// }
+
+const checkIfConnectedOnRepeat = async discordId => {
+  return new Promise(() => {
+    setInterval(() => {
+      console.log(`running every second forever to see if ${discordId} is tethere`)
+    }, 1000)
+  })
 }
