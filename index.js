@@ -47,7 +47,7 @@ const steps = [
   {
     question: `Fantastic. To access the sever, please click this
     link to connect your Scrimba account: https://scrimba.com/discord/connect`,
-    process: (answer, member) => checkIfConnectedOnRepeat(member.id)
+    process: (answer, member) => fetchScrimbaUser(member.id)
   }
 ]
 
@@ -95,21 +95,18 @@ const sendWelcomeDirectMessage = member => member.send('hi')
 
 bot.login(process.env.TOKEN)
 
-// const processMember = async discordId => {
-//   const { rows }  = await pool.query(`SELECT * FROM USERS WHERE discord_id = '${discordId}'`)
-//   const user = rows[0]
-//   if (user) {
-//     console.log(`${discordId} joined. we already know who this is,`, user)
-//   } else {
-//     console.log(`${discordId} joined. unknown Scrimba user`, user)
-//   }
-//   // console.log('rows.length', rows.length)
-// }
-
-const checkIfConnectedOnRepeat = async discordId => {
-  return new Promise(() => {
-    setInterval(() => {
-      console.log(`running every second forever to see if ${discordId} is tethere`)
+const fetchScrimbaUser = async discordId => {
+  return new Promise(resolve => {
+    const interval = setInterval(async () => {
+      const { rows }  = await pool
+        .query(`SELECT * 
+          FROM USERS 
+          WHERE discord_id = '${discordId}'`)
+      const user = rows[0]
+      if (user) {
+        resolve()
+        clearInterval(interval)
+      }
     }, 1000)
   })
 }
