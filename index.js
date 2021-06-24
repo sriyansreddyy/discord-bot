@@ -1,5 +1,9 @@
 const Discord = require('discord.js')
-const bot = new Discord.Client()
+const bot = new Discord.Client({ 
+  partials: ['MESSAGE', 'REACTION']
+})
+
+
 const { Pool, Client } = require('pg')
 require('dotenv').config()
 
@@ -48,6 +52,9 @@ const steps = [
     question: `Fantastic. To access the sever, please click this
     link to connect your Scrimba account: https://scrimba.com/discord/connect`,
     process: (answer, member) => fetchScrimbaUser(member.id)
+  },
+  {
+    question: 'Watch this then https://youtu.be/lPIi430q5fk respond with the ✅',
   }
 ]
 
@@ -63,7 +70,6 @@ bot.on('message', async message => {
     const onboardee = channel.name.split("-")[1]
     const sender = author.discriminator
     if (sender === onboardee) {
-
       const messages = await channel.messages.fetch()
       const botMessages = messages
         .filter(message => message.author.id === bot.user.id)
@@ -87,6 +93,10 @@ bot.on('message', async message => {
 
     }
   }
+})
+
+bot.on('messageReactionAdd', x => {
+  console.log('x', x)
 })
 
 const assignRegularMemberRole = (member) => member.roles.add(REGULAR_MEMBER_ROLE_ID)
