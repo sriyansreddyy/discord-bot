@@ -48,7 +48,7 @@ bot.on('message', async message => {
   const { 
     channel,
     author,
-    content,
+    content: answer,
     member
   } = message
   if (channel.type === "text" 
@@ -63,11 +63,11 @@ bot.on('message', async message => {
       const question = botMessages.first().content
 
       const answers = { }
-      answers[question] = content
+      answers[question] = answer
       
       const index = steps.findIndex(step => step.question === question)
       const step = steps[index]
-      step.process(content, member)
+      step.process(answer, member)
       const nextStep = steps[index + 1]
 
       if (nextStep) {
