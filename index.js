@@ -1,11 +1,16 @@
 const Discord = require('discord.js')
 const bot = new Discord.Client()
+const { Pool, Client } = require('pg')
 require('dotenv').config()
 
 const WELCOME_PREFIX = 'welcome-'
 const ONBOARDING_CATEGORY_ID = '855011722916790272'
 const EVERYONE_ROLE_ID = '837036811825840129'
 const REGULAR_MEMBER_ROLE_ID = '855434174151262238'
+
+const pool = new Pool({
+  connectionString: process.env.PG_URI
+})
 
 bot.on('ready', async () => {
   console.log(`Logged in as ${bot.user.id}!`)
@@ -31,15 +36,19 @@ bot.on('guildMemberAdd', async member => {
 
   const firstStep = steps[0]
   await channel.send(firstStep.question)
+
+  await processMember(member.id)
 })
 
 const steps = [
   {
-    question: "Welcome to the Scrimba Discord, what should we call you?",
+    question: "Welcome to the Scrimba Discord! What should we call you?",
     process: async (answer, member) => await member.setNickname(answer)
   },
   {
-    question: "Great! And what is your email?",
+    shouldRun: (member)  => true,
+    question: `Fantastic. To access the sever, please click this
+    link to connect your Scrimba account: https://scrimba.com/discord/connect`,
     process: () => console.log("email processed")
   }
 ]
@@ -87,3 +96,14 @@ const cleanup = channel => channel.delete()
 const sendWelcomeDirectMessage = member => member.send('hi')
 
 bot.login(process.env.TOKEN)
+
+const processMember = async discordId => {
+  const { rows }  = await pool.query(`SELECT * FROM USERS WHERE discord_id = '${discordId}'`)
+  const user = rows[0]
+  if (user) {
+    console.log(`${discordId} joined. we already know who this is,`, user)
+  } else {
+    console.log(`${discordId} joined. unknown Scrimba user`, user)
+  }
+  // console.log('rows.length', rows.length)
+}
