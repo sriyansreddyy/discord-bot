@@ -90,8 +90,9 @@ bot.on('message', async message => {
 
       if (nextStep) {
         const message = await channel.send(nextStep.question)
-        if(nextStep.reaction) 
-          message.react(nextStep.reaction)
+        if(nextStep.reaction) {
+          await message.react(nextStep.reaction)
+        }
       } else {
         await assignRegularMemberRole(member)
         await cleanup(channel)
@@ -127,9 +128,6 @@ bot.on('messageReactionAdd', async (messageReaction, user) => {
         .filter(message => message.author.id === bot.user.id)
       const question = botMessages.first().content
 
-      console.log('question', question)
-      console.log('reaction', emoji.name)
-
       const answer = emoji.name
       const answers = { }
       answers[question] = answer
@@ -147,20 +145,6 @@ bot.on('messageReactionAdd', async (messageReaction, user) => {
       }
     }
   }
-
-
-
-
-  // console.log('messageReaction', messageReaction)
-
-
-  // console.log('partial?', partial)
-  // console.log('channel', channel)
-  // console.log('messageId', messageId)
-  // console.log('author', users)
-  // console.log('reactions', users)
-  // console.log('users', users)
-  // console.log('count', count)
 })
 
 const assignRegularMemberRole = member => member.roles.add(REGULAR_MEMBER_ROLE_ID)
