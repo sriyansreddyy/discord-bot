@@ -1,10 +1,11 @@
+require('dotenv').config()
+
 const Discord = require('discord.js')
+const { Pool, Client } = require('pg')
+
 const bot = new Discord.Client({ 
   partials: ['MESSAGE', 'REACTION']
 })
-
-const { Pool, Client } = require('pg')
-require('dotenv').config()
 
 const WELCOME_PREFIX = 'welcome-'
 const ONBOARDING_CATEGORY_ID = '857924654903984168'
@@ -14,6 +15,30 @@ const REGULAR_MEMBER_ROLE_ID = '855434174151262238'
 const pool = new Pool({
   connectionString: process.env.PG_URI
 })
+
+const steps = [
+  {
+    question: "Welcome to the Scrimba Discord! What should we call you?",
+    validate: message => {
+      if (message.includes(' ')) {
+        return false
+      }
+      return true
+    },
+    process: async (answer, member) => await member.setNickname(answer)
+  },
+  {
+    question: `Fantastic. To access the sever, please click this
+    link to connect your Scrimba account: https://scrimba.com/discord/connect`,
+    process: (answer, member, channel) => fetchScrimbaUser(member.id, channel),
+    processImmedaitely: true,
+  },
+  {
+    question: 'Watch this then https://youtu.be/lPIi430q5fk respond with the ✅',
+    reaction: '✅',
+    process: () => console.log('process emojiii')
+  }
+]
 
 bot.on('ready', async () => {
   console.log(`Logged in as ${bot.user.id}!`)
@@ -41,31 +66,6 @@ bot.on('guildMemberAdd', async member => {
   await channel.send(firstStep.question)
 })
 
-
-const steps = [
-  {
-    question: "Welcome to the Scrimba Discord! What should we call you?",
-    validate: message => {
-      if (message.includes(' ')) {
-        return false
-      }
-      return true
-    },
-    process: async (answer, member) => await member.setNickname(answer)
-  },
-  {
-    question: `Fantastic. To access the sever, please click this
-    link to connect your Scrimba account: https://scrimba.com/discord/connect`,
-    process: (answer, member, channel) => fetchScrimbaUser(member.id, channel),
-    processImmedaitely: true,
-  },
-  {
-    question: 'Watch this then https://youtu.be/lPIi430q5fk respond with the ✅',
-    reaction: '✅',
-    process: () => console.log('process emojiii')
-  }
-]
-
 bot.on('message', async message => {
   const { 
     channel,
@@ -91,6 +91,7 @@ bot.on('message', async message => {
       const step = steps[index]
       if (step.validate && !step.validate(answer)) {
         await channel.send("❌ input validation error")
+        return
       }
 
       await step.process(answer, member, channel)
@@ -109,7 +110,6 @@ bot.on('message', async message => {
           if(nextNextStep.reaction) {
             await message.react(nextNextStep.reaction)
           }
-
         }
       } else {
         await assignRegularMemberRole(member)
@@ -161,7 +161,12 @@ bot.on('messageReactionAdd', async (messageReaction, user) => {
       if (nextStep) {
         await channel.send(nextStep.question)
       } else {
-        const member = messageReaction.message.guild.members.cache.find(member => member.id === user.id)
+        const member = messageReaction
+          .message
+          .guild
+          .members
+          .cache
+          .find(member => member.id === user.id)
         await assignRegularMemberRole(member)
         await cleanup(channel)
         await sendWelcomeDirectMessage(user)
@@ -170,11 +175,11 @@ bot.on('messageReactionAdd', async (messageReaction, user) => {
   }
 })
 
-const assignRegularMemberRole = member => member.roles.add(REGULAR_MEMBER_ROLE_ID)
-const cleanup = channel => channel.delete()
-const sendWelcomeDirectMessage = member => member.send('hi')
+const assignRegularMemberRole = member => member
+  .roles
+  .add(REGULAR_MEMBER_ROLE_ID)
 
-bot.login(process.env.TOKEN)
+const sendWelcomeDirectMessage = member => member.send('hi')
 
 const fetchScrimbaUser = async (discordId, channel) => {
   await channel.overwritePermissions([
@@ -213,3 +218,6 @@ const fetchScrimbaUser = async (discordId, channel) => {
     }, 1000)
   })
 }
+
+const cleanup = channel => channel.delete()
+bot.login(process.env.TOKEN)
