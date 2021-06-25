@@ -122,7 +122,7 @@ bot.on('message', async message => {
     member
   } = message
 
-  if (!channel.name.startsWith(WELCOME_PREFIX)) {
+  if (channel.type !== "text" || !channel.name.startsWith(WELCOME_PREFIX)) {
     return
   }
 
@@ -152,7 +152,7 @@ bot.on('messageReactionAdd', async (messageReaction, user) => {
     return
   }
 
-  if (channel.name.startsWith(WELCOME_PREFIX)) {
+  if (channel.type === "text" && channel.name.startsWith(WELCOME_PREFIX)) {
     const onboardee = channel.name.split("-")[1]
     const reactor = `${user.username}_${user.discriminator}`
 
@@ -170,10 +170,7 @@ bot.on('messageReactionAdd', async (messageReaction, user) => {
   }
 })
 
-const assignRegularMemberRole = member => {
-  console.log("member", member)
-  member.roles .add(REGULAR_MEMBER_ROLE_ID)
-}
+const assignRegularMemberRole = member =>  member.roles.add(REGULAR_MEMBER_ROLE_ID)
 
 const sendWelcomeDirectMessage = member => member.send('hi')
 
