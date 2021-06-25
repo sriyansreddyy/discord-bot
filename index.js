@@ -7,7 +7,6 @@ const bot = new Client({
   partials: ['MESSAGE', 'REACTION']
 })
 
-
 const WELCOME_PREFIX = '👋welcome-'
 const ONBOARDING_CATEGORY_ID = '857924654903984168'
 const EVERYONE_ROLE_ID = '837036811825840129'
@@ -66,6 +65,55 @@ bot.on('guildMemberAdd', async member => {
   await channel.send(firstStep.question)
 })
 
+const findStep = async channel => {
+  const messages = await channel.messages.fetch()
+  const botMessages = messages
+    .filter(message => message.author.id === bot.user.id)
+    .filter(message => !message.content.startsWith('❌'))
+  const question = botMessages.first().content
+  const index = steps.findIndex(step => step.question === question)
+  const step = steps[index]
+  return { step, index }
+}
+
+const handle = async (
+  step,
+  index,
+  channel,
+  member,
+  answer) => {
+
+  const error = step.validate?.(answer)
+  if (error) {
+    await channel.send(`❌ ${error}`)
+    return
+  }
+  await step.process(answer, member, channel)
+
+  index += 1
+  const nextStep = steps[index]
+  if (nextStep) {
+    const message = await channel.send(nextStep.question)
+    if(nextStep.reaction) {
+      await message.react(nextStep.reaction)
+    }
+
+    if (nextStep.processImmedaitely) {
+      await handle(nextStep, index, channel, member, answer)
+    }
+  } else {
+    await assignRegularMemberRole(member)
+    await cleanup(channel)
+    await sendWelcomeDirectMessage(member)
+        // const member = messageReaction
+        //   .message
+        //   .guild
+        //   .members
+        //   .cache
+        //   .find(member => member.id === user.id)
+  }
+}
+
 bot.on('message', async message => {
   const { 
     channel,
@@ -73,118 +121,59 @@ bot.on('message', async message => {
     content: answer,
     member
   } = message
-  if (channel.type === "text" 
-    && channel.name.startsWith(WELCOME_PREFIX)) {
-    const onboardee = channel.name.split("-")[1]
-    console.log('author.username', author.username)
-    const sender = `${author.username}_${author.discriminator}`
-    if (sender === onboardee) {
-      const messages = await channel.messages.fetch()
-      const botMessages = messages
-        .filter(message => message.author.id === bot.user.id)
-        .filter(message => !message.content.startsWith('❌'))
-      const question = botMessages.first().content
 
-      const answers = { }
-      answers[question] = answer
-      
-      const index = steps.findIndex(step => step.question === question)
-      const step = steps[index]
+  if (!channel.name.startsWith(WELCOME_PREFIX)) {
+    return
+  }
 
-      const error = step.validate?.(answer)
-      if (error) {
-        await channel.send(`❌ ${error}`)
-        return
-      }
+  const onboardee = channel.name.split("-")[1]
+  const sender = `${author.username}_${author.discriminator}`
 
-      await step.process(answer, member, channel)
-      const nextStep = steps[index + 1]
-
-      if (nextStep) {
-        const message = await channel.send(nextStep.question)
-        if(nextStep.reaction) {
-          await message.react(nextStep.reaction)
-        }
-        if (nextStep.processImmedaitely) {
-          // this is ridic
-          await nextStep.process(answer, member, channel)
-          const nextNextStep = steps[index + 2]
-          const message = await channel.send(nextNextStep.question)
-          if(nextNextStep.reaction) {
-            await message.react(nextNextStep.reaction)
-          }
-        }
-      } else {
-        await assignRegularMemberRole(member)
-        await cleanup(channel)
-        await sendWelcomeDirectMessage(member)
-      }
-
-    }
+  if (sender === onboardee) {
+    const { step, index } = await findStep(channel)
+    await handle(step, index, channel, member, answer)
   }
 })
 
 bot.on('messageReactionAdd', async (messageReaction, user) => {
   const { 
-    partial,
-    message,
+    // partial,
+    message: { channel },
     emoji 
   } = messageReaction
-  const { channel}  = message
 
-  if (partial) {
-    // TODO: process partial messages if needed
-    console.error('partial', partial)
-    // await messageReaction.fetch()
-  }
+  // if (partial) {
+  //   // TODO: process partial messages if needed
+  //   console.error('partial', partial)
+  //   // await messageReaction.fetch()
+  // }
 
   if (user.id === bot.user.id) {
-    console.log('it\'s just the botty bot')
     return
   }
 
-  if (channel.type === "text" 
-    && channel.name.startsWith(WELCOME_PREFIX)) {
+  if (channel.name.startsWith(WELCOME_PREFIX)) {
     const onboardee = channel.name.split("-")[1]
     const reactor = `${user.username}_${user.discriminator}`
-    if (reactor === onboardee) {
-      const messages = await channel.messages.fetch()
-      const botMessages = messages
-        .filter(message => message.author.id === bot.user.id)
-      const question = botMessages.first().content
 
+    if (reactor === onboardee) {
+      const { step, index } = await findStep(channel)
       const answer = emoji.name
-      const answers = { }
-      answers[question] = answer
-      const index = steps.findIndex(step => step.question === question)
-      const step = steps[index]
 
       if (step.reaction && step.reaction !== answer)  {
         return
       }
 
-      await step.process(answer, user)
-      const nextStep = steps[index + 1]
-      if (nextStep) {
-        await channel.send(nextStep.question)
-      } else {
-        const member = messageReaction
-          .message
-          .guild
-          .members
-          .cache
-          .find(member => member.id === user.id)
-        await assignRegularMemberRole(member)
-        await cleanup(channel)
-        await sendWelcomeDirectMessage(user)
-      }
+      const member = messageReaction.message.guild.members.cache.find(member => member.id === user.id)
+      await handle(step, index, channel, member, answer)
     }
   }
 })
 
-const assignRegularMemberRole = member => member
-  .roles
-  .add(REGULAR_MEMBER_ROLE_ID)
+const assignRegularMemberRole = member => {
+  console.log("member", member)
+  member.roles .add(REGULAR_MEMBER_ROLE_ID)
+}
 
 const sendWelcomeDirectMessage = member => member.send('hi')
 
