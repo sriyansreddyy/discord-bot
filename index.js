@@ -7,7 +7,7 @@ const { Pool, Client } = require('pg')
 require('dotenv').config()
 
 const WELCOME_PREFIX = 'welcome-'
-const ONBOARDING_CATEGORY_ID = '855011722916790272'
+const ONBOARDING_CATEGORY_ID = '857924654903984168'
 const EVERYONE_ROLE_ID = '837036811825840129'
 const REGULAR_MEMBER_ROLE_ID = '855434174151262238'
 
@@ -45,6 +45,12 @@ bot.on('guildMemberAdd', async member => {
 const steps = [
   {
     question: "Welcome to the Scrimba Discord! What should we call you?",
+    validate: message => {
+      if (message.includes(' ')) {
+        return false
+      }
+      return true
+    },
     process: async (answer, member) => await member.setNickname(answer)
   },
   {
@@ -74,6 +80,7 @@ bot.on('message', async message => {
       const messages = await channel.messages.fetch()
       const botMessages = messages
         .filter(message => message.author.id === bot.user.id)
+        .filter(message => !message.content.startsWith('❌'))
       const question = botMessages.first().content
 
       const answers = { }
@@ -81,6 +88,10 @@ bot.on('message', async message => {
       
       const index = steps.findIndex(step => step.question === question)
       const step = steps[index]
+      if (!step.validate(answer)) {
+        await channel.send("❌ input validation error")
+        return
+      }
       await step.process(answer, member)
       const nextStep = steps[index + 1]
 
