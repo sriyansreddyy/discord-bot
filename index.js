@@ -27,6 +27,7 @@ const steps = [
     process: async (answer, member) => await member.setNickname(answer)
   },
   {
+    shouldSkip: () => true,
     question: `Fantastic. To access the sever, please click this
     link to connect your Scrimba account: https://scrimba.com/discord/connect`,
     process: (answer, member, channel) => fetchScrimbaUser(member.id, channel),
@@ -92,7 +93,18 @@ const handle = async (
 
   index += 1
   const nextStep = steps[index]
+
   if (nextStep) {
+
+    const shouldSkip = nextStep.shouldSkip?.()
+    if (shouldSkip) {
+      console.log(`i should be skipping ${nextStep.question} this but oh well`)
+      // BIG TODO: need to go up a few lines and run this
+      // again without the step BUT i don't intend to
+      // process the step or do inptu validation since we're
+      // skipping the step ARGH
+    }
+
     const message = await channel.send(nextStep.question)
     if(nextStep.reaction) {
       await message.react(nextStep.reaction)
@@ -105,12 +117,6 @@ const handle = async (
     await assignRegularMemberRole(member)
     await cleanup(channel)
     await sendWelcomeDirectMessage(member)
-        // const member = messageReaction
-        //   .message
-        //   .guild
-        //   .members
-        //   .cache
-        //   .find(member => member.id === user.id)
   }
 }
 
@@ -164,6 +170,8 @@ bot.on('messageReactionAdd', async (messageReaction, user) => {
         return
       }
 
+      // messageReactionAdd only gives us a user so we need
+      // to find the guild member
       const member = messageReaction.message.guild.members.cache.find(member => member.id === user.id)
       await handle(step, index, channel, member, answer)
     }
