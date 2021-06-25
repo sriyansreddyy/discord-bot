@@ -56,7 +56,8 @@ const steps = [
   {
     question: `Fantastic. To access the sever, please click this
     link to connect your Scrimba account: https://scrimba.com/discord/connect`,
-    process: (answer, member) => fetchScrimbaUser(member.id)
+    process: (answer, member, channel) => fetchScrimbaUser(member.id, channel),
+    processImmedaitely: true,
   },
   {
     question: 'Watch this then https://youtu.be/lPIi430q5fk respond with the ✅',
@@ -88,17 +89,27 @@ bot.on('message', async message => {
       
       const index = steps.findIndex(step => step.question === question)
       const step = steps[index]
-      if (!step.validate(answer)) {
+      if (step.validate && !step.validate(answer)) {
         await channel.send("❌ input validation error")
-        return
       }
-      await step.process(answer, member)
+
+      await step.process(answer, member, channel)
       const nextStep = steps[index + 1]
 
       if (nextStep) {
         const message = await channel.send(nextStep.question)
         if(nextStep.reaction) {
           await message.react(nextStep.reaction)
+        }
+        if (nextStep.processImmedaitely) {
+          // this is ridic
+          await nextStep.process(answer, member, channel)
+          const nextNextStep = steps[index + 2]
+          const message = await channel.send(nextNextStep.question)
+          if(nextNextStep.reaction) {
+            await message.react(nextNextStep.reaction)
+          }
+
         }
       } else {
         await assignRegularMemberRole(member)
@@ -165,7 +176,18 @@ const sendWelcomeDirectMessage = member => member.send('hi')
 
 bot.login(process.env.TOKEN)
 
-const fetchScrimbaUser = async discordId => {
+const fetchScrimbaUser = async (discordId, channel) => {
+  await channel.overwritePermissions([
+    {
+      id: EVERYONE_ROLE_ID,
+      deny: ['VIEW_CHANNEL']
+    },
+    {
+      id: discordId,
+      allow: ['VIEW_CHANNEL'],
+      deny: ['SEND_MESSAGES']
+    }
+  ])
   return new Promise(resolve => {
     const interval = setInterval(async () => {
       const { rows }  = await pool
@@ -174,6 +196,17 @@ const fetchScrimbaUser = async discordId => {
           WHERE discord_id = '${discordId}'`)
       const user = rows[0]
       if (user) {
+        await channel.overwritePermissions([
+          {
+            id: EVERYONE_ROLE_ID,
+            deny: ['VIEW_CHANNEL']
+          },
+          {
+            id: discordId,
+            allow: ['VIEW_CHANNEL']
+            // deny: ['SEND_MESSAGES']
+          }
+        ])
         resolve()
         clearInterval(interval)
       }
