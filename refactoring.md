@@ -1,8 +1,8 @@
 # Refactoring
 - Input validaion
   - ~It's not working~
-  - Look at form validation libraries for syntax inpsiration
-  - Need to return specific error message
+  - ~Look at form validation libraries for syntax inpsiration~
+  - ~Need to return specific error message~
 - Channel creation
   - Name should include more than just the discriminator
   - First step logic is OK as long as it doesn't need

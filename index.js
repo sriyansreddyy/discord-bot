@@ -7,7 +7,8 @@ const bot = new Client({
   partials: ['MESSAGE', 'REACTION']
 })
 
-const WELCOME_PREFIX = 'welcome-'
+
+const WELCOME_PREFIX = '👋welcome-'
 const ONBOARDING_CATEGORY_ID = '857924654903984168'
 const EVERYONE_ROLE_ID = '837036811825840129'
 const REGULAR_MEMBER_ROLE_ID = '855434174151262238'
@@ -47,7 +48,7 @@ bot.on('guildMemberAdd', async member => {
   const channel = await member
     .guild
     .channels
-    .create(`${WELCOME_PREFIX}${member.user.discriminator}`, {
+    .create(`${WELCOME_PREFIX}${member.user.username}_${member.user.discriminator}`, {
       parent: ONBOARDING_CATEGORY_ID,
       permissionOverwrites: [
         {
@@ -75,7 +76,8 @@ bot.on('message', async message => {
   if (channel.type === "text" 
     && channel.name.startsWith(WELCOME_PREFIX)) {
     const onboardee = channel.name.split("-")[1]
-    const sender = author.discriminator
+    console.log('author.username', author.username)
+    const sender = `${author.username}_${author.discriminator}`
     if (sender === onboardee) {
       const messages = await channel.messages.fetch()
       const botMessages = messages
@@ -144,7 +146,7 @@ bot.on('messageReactionAdd', async (messageReaction, user) => {
   if (channel.type === "text" 
     && channel.name.startsWith(WELCOME_PREFIX)) {
     const onboardee = channel.name.split("-")[1]
-    const reactor = user.discriminator
+    const reactor = `${user.username}_${user.discriminator}`
     if (reactor === onboardee) {
       const messages = await channel.messages.fetch()
       const botMessages = messages
