@@ -48,10 +48,6 @@ const steps = [
     process: async (answer, member) => await member.setNickname(answer)
   },
   {
-    question: "What's your favourite programming language?",
-    process: console.log('user answered')
-  },
-  {
     question: `Fantastic. To access the sever, please click this
     link to connect your Scrimba account: https://scrimba.com/discord/connect`,
     process: (answer, member) => fetchScrimbaUser(member.id)
@@ -133,6 +129,11 @@ bot.on('messageReactionAdd', async (messageReaction, user) => {
       answers[question] = answer
       const index = steps.findIndex(step => step.question === question)
       const step = steps[index]
+
+      if (step.reaction && step.reaction !== answer)  {
+        return
+      }
+
       await step.process(answer, user)
       const nextStep = steps[index + 1]
       if (nextStep) {
