@@ -4,7 +4,7 @@
   - ~Look at form validation libraries for syntax inpsiration~
   - ~Need to return specific error message~
 - Channel creation
-  - Name should include more than just the discriminator
+  - ~Name should include more than just the discriminator~
   - First step logic is OK as long as it doesn't need
     processing instantly which won't ever? be true
 - Handle event
