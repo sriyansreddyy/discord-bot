@@ -1,9 +1,9 @@
 require('dotenv').config()
 
-const Discord = require('discord.js')
-const { Pool, Client } = require('pg')
+const { Client } = require('discord.js')
+const { Pool } = require('pg')
 
-const bot = new Discord.Client({ 
+const bot = new Client({ 
   partials: ['MESSAGE', 'REACTION']
 })
 
@@ -21,9 +21,8 @@ const steps = [
     question: "Welcome to the Scrimba Discord! What should we call you?",
     validate: message => {
       if (message.includes(' ')) {
-        return false
+        return `You wrote "${message}" but that includes a space! What is your *first* name, please?`
       }
-      return true
     },
     process: async (answer, member) => await member.setNickname(answer)
   },
@@ -89,8 +88,10 @@ bot.on('message', async message => {
       
       const index = steps.findIndex(step => step.question === question)
       const step = steps[index]
-      if (step.validate && !step.validate(answer)) {
-        await channel.send("❌ input validation error")
+
+      const error = step.validate?.(answer)
+      if (error) {
+        await channel.send(`❌ ${error}`)
         return
       }
 
@@ -122,7 +123,13 @@ bot.on('message', async message => {
 })
 
 bot.on('messageReactionAdd', async (messageReaction, user) => {
-  const { partial, message, emoji } = messageReaction
+  const { 
+    partial,
+    message,
+    emoji 
+  } = messageReaction
+  const { channel}  = message
+
   if (partial) {
     // TODO: process partial messages if needed
     console.error('partial', partial)
@@ -133,8 +140,6 @@ bot.on('messageReactionAdd', async (messageReaction, user) => {
     console.log('it\'s just the botty bot')
     return
   }
-
-  const { channel}  = message
 
   if (channel.type === "text" 
     && channel.name.startsWith(WELCOME_PREFIX)) {
