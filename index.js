@@ -28,6 +28,8 @@ const steps = [
   },
   {
     shouldSkip: () => true,
+    // todo: inform someone who found Discord before Scrimba
+    // what Scrimba is about and how to make an account
     question: `Fantastic. To access the sever, please click this
     link to connect your Scrimba account: https://scrimba.com/discord/connect`,
     process: (answer, member, channel) => fetchScrimbaUser(member.id, channel),
