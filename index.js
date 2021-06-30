@@ -33,7 +33,7 @@ const steps = [
     question: `Fantastic. To access the sever, please click this
     link to connect your Scrimba account: https://scrimba.com/discord/connect`,
     process: (answer, member, channel) => fetchScrimbaUser(member.id, channel),
-    processImmedaitely: true,
+    processImmediately: true,
   },
   {
     question: 'Watch this then https://youtu.be/lPIi430q5fk respond with the ✅',
@@ -112,7 +112,7 @@ const handle = async (
       await message.react(nextStep.reaction)
     }
 
-    if (nextStep.processImmedaitely) {
+    if (nextStep.processImmediately) {
       await handle(nextStep, index, channel, member, answer)
     }
   } else {
