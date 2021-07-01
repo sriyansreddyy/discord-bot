@@ -27,7 +27,7 @@ const steps = [
     process: async (answer, member) => await member.setNickname(answer)
   },
   {
-    shouldSkip: () => true,
+    shouldSkip: () => false,
     // todo: inform someone who found Discord before Scrimba
     // what Scrimba is about and how to make an account
     question: `Fantastic. To access the sever, please click this
@@ -79,32 +79,22 @@ const findStep = async channel => {
   return { step, index }
 }
 
-const handle = async (
+const foo = async (
   step,
   index,
   channel,
   member,
-  answer) => {
-
-  const error = step.validate?.(answer)
-  if (error) {
-    await channel.send(`❌ ${error}`)
-    return
-  }
-  await step.process(answer, member, channel)
-
+  answer
+) => {
   index += 1
-  const nextStep = steps[index]
+  let nextStep = steps[index]
 
   if (nextStep) {
 
     const shouldSkip = nextStep.shouldSkip?.()
     if (shouldSkip) {
-      console.log(`i should be skipping ${nextStep.question} this but oh well`)
-      // BIG TODO: need to go up a few lines and run this
-      // again without the step BUT i don't intend to
-      // process the step or do inptu validation since we're
-      // skipping the step ARGH
+      await foo(null, index, channel, member, answer)
+      return
     }
 
     const message = await channel.send(nextStep.question)
@@ -120,6 +110,22 @@ const handle = async (
     await cleanup(channel)
     await sendWelcomeDirectMessage(member)
   }
+}
+
+const handle = async (
+  step,
+  index,
+  channel,
+  member,
+  answer) => {
+
+  const error = step.validate?.(answer)
+  if (error) {
+    await channel.send(`❌ ${error}`)
+    return
+  }
+  await step.process(answer, member, channel)
+  await foo(step, index, channel, member)
 }
 
 bot.on('message', async message => {
