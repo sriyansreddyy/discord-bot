@@ -36,8 +36,7 @@ const steps = [
         return "you wrote OK but you haven't set an avatar yet!"
       }
     },
-    question: 'Hi, I noticed you don\'t have an avatar. Please set one then type OK',
-    process: () => true
+    question: 'Hi, I noticed you don\'t have an avatar. Please set one then type OK'
   },
   {
     shouldSkip: async member => await findScrimbaUserByDiscordId(member.user.id),
@@ -48,8 +47,7 @@ const steps = [
   },
   {
     question: 'Watch this then https://youtu.be/lPIi430q5fk respond with the ✅',
-    reaction: '✅',
-    process: () => console.log('process emojiii')
+    reaction: '✅'
   }
 ]
 
@@ -99,9 +97,6 @@ const sendNextStep = async (
   const nextStep = steps[currentStepIndex]
 
   if (nextStep) {
-
-    console.log('member', member)
-    console.log('member.avatar? ', member.avatar)
     const shouldSkip = await nextStep.shouldSkip?.(member)
     if (shouldSkip) {
       await sendNextStep(currentStepIndex, channel, member)
@@ -134,7 +129,7 @@ const processAnswer = async (
     await channel.send(`❌ ${error}`)
     return
   }
-  await currentStep.process(answer, member, channel)
+  await currentStep.process?.(answer, member, channel)
   await sendNextStep(currentStepIndex, channel, member)
 }
 
