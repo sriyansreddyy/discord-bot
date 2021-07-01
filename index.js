@@ -68,7 +68,7 @@ bot.on('guildMemberAdd', async member => {
   await channel.send(firstStep.question)
 })
 
-const findStep = async channel => {
+const findCurrentStep = async channel => {
   const messages = await channel.messages.fetch()
   const botMessages = messages
     .filter(message => message.author.id === bot.user.id)
@@ -79,21 +79,20 @@ const findStep = async channel => {
   return { step, index }
 }
 
-const foo = async (
-  step,
-  index,
+const sendNextStep = async (
+  currentStepIndex,
   channel,
-  member,
-  answer
+  member
 ) => {
-  index += 1
-  let nextStep = steps[index]
+  currentStepIndex += 1
+  const nextStep = steps[currentStepIndex]
 
   if (nextStep) {
 
     const shouldSkip = nextStep.shouldSkip?.()
     if (shouldSkip) {
-      await foo(null, index, channel, member, answer)
+      currentStepIndex += 1
+      await sendNextStep(currentStepIndex, channel, member)
       return
     }
 
@@ -103,7 +102,7 @@ const foo = async (
     }
 
     if (nextStep.processImmediately) {
-      await handle(nextStep, index, channel, member, answer)
+      await processAnswer(nextStep, currentStepIndex, channel, member, '')
     }
   } else {
     await assignRegularMemberRole(member)
@@ -112,20 +111,19 @@ const foo = async (
   }
 }
 
-const handle = async (
-  step,
-  index,
+const processAnswer = async (
+  currentStep,
+  currentStepIndex,
   channel,
   member,
   answer) => {
-
-  const error = step.validate?.(answer)
+  const error = currentStep.validate?.(answer)
   if (error) {
     await channel.send(`❌ ${error}`)
     return
   }
-  await step.process(answer, member, channel)
-  await foo(step, index, channel, member)
+  await currentStep.process(answer, member, channel)
+  await sendNextStep(currentStepIndex, channel, member)
 }
 
 bot.on('message', async message => {
@@ -144,8 +142,8 @@ bot.on('message', async message => {
   const sender = `${author.username}_${author.discriminator}`
 
   if (sender === onboardee) {
-    const { step, index } = await findStep(channel)
-    await handle(step, index, channel, member, answer)
+    const { step, index } = await findCurrentStep(channel)
+    await processAnswer(step, index, channel, member, answer)
   }
 })
 
@@ -153,7 +151,7 @@ bot.on('messageReactionAdd', async (messageReaction, user) => {
   const { 
     // partial,
     message: { channel },
-    emoji 
+    emoji : { name: answer }
   } = messageReaction
 
   // if (partial) {
@@ -162,27 +160,30 @@ bot.on('messageReactionAdd', async (messageReaction, user) => {
   //   // await messageReaction.fetch()
   // }
 
+  if (channel.type !== "text" && !channel.name.startsWith(WELCOME_PREFIX)) {
+    return
+  }
+  
+  // the reaction was added by the bot to make it easy for
+  // the user
   if (user.id === bot.user.id) {
     return
   }
 
-  if (channel.type === "text" && channel.name.startsWith(WELCOME_PREFIX)) {
-    const onboardee = channel.name.split("-")[1]
-    const reactor = `${user.username}_${user.discriminator}`
+  const onboardee = channel.name.split("-")[1]
+  const reactor = `${user.username}_${user.discriminator}`
 
-    if (reactor === onboardee) {
-      const { step, index } = await findStep(channel)
-      const answer = emoji.name
+  if (reactor === onboardee) {
+    const { step, index } = await findCurrentStep(channel)
 
-      if (step.reaction && step.reaction !== answer)  {
-        return
-      }
-
-      // messageReactionAdd only gives us a user so we need
-      // to find the guild member
-      const member = messageReaction.message.guild.members.cache.find(member => member.id === user.id)
-      await handle(step, index, channel, member, answer)
+    if (step.reaction && step.reaction !== answer)  {
+      return
     }
+
+    // messageReactionAdd only gives us a user so we need
+    // to find the guild member
+    const member = messageReaction.message.guild.members.cache.find(member => member.id === user.id)
+    await processAnswer(step, index, channel, member, answer)
   }
 })
 
