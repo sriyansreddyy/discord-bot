@@ -15,3 +15,8 @@
 - (good first issue) Need to create new group if channels in group > 50
 
 - Testing (this would really benefit from being mocked but I
+
+
+## Refactoring
+- should refactor all arguments to take an arguments object
+  since many are optional depending on the curcumstance

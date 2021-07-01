@@ -19,12 +19,25 @@ const pool = new Pool({
 const steps = [
   {
     question: "Welcome to the Scrimba Discord! What should we call you?",
-    validate: message => {
-      if (message.includes(' ')) {
-        return `You wrote "${message}" but that includes a space! What is your *first* name, please?`
+    validate: answer => {
+      if (answer.includes(' ')) {
+        return `You wrote "${answer}" but that includes a space! What is your *first* name, please?`
       }
     },
     process: async (answer, member) => await member.setNickname(answer)
+  }, 
+  {
+    shouldSkip: member => member.user.avatar,
+    validate: (answer, member) => {
+      if (answer !== "OK") {
+        return "you didn not write OK"
+      }
+      if (!member.user.avatar) {
+        return "you wrote OK but you haven't set an avatar yet!"
+      }
+    },
+    question: 'Hi, I noticed you don\'t have an avatar. Please set one then type OK',
+    process: () => true
   },
   {
     shouldSkip: () => true,
@@ -87,7 +100,9 @@ const sendNextStep = async (
 
   if (nextStep) {
 
-    const shouldSkip = nextStep.shouldSkip?.()
+    console.log('member', member)
+    console.log('member.avatar? ', member.avatar)
+    const shouldSkip = nextStep.shouldSkip?.(member)
     if (shouldSkip) {
       await sendNextStep(currentStepIndex, channel, member)
       return
@@ -114,7 +129,7 @@ const processAnswer = async (
   channel,
   member,
   answer) => {
-  const error = currentStep.validate?.(answer)
+  const error = currentStep.validate?.(answer, member)
   if (error) {
     await channel.send(`❌ ${error}`)
     return
