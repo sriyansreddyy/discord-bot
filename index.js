@@ -8,12 +8,10 @@ const bot = new Client({
 })
 
 const WELCOME_PREFIX = '👋welcome-'
-const ONBOARDING_CATEGORY_ID = '860224991122948126'
-const EVERYONE_ROLE_ID = '837036811825840129'
-const REGULAR_MEMBER_ROLE_ID = '855434174151262238'
+const { ONBOARDING_CATEGORY_ID, EVERYONE_ROLE_ID, REGULAR_MEMBER_ROLE_ID, TOKEN, PG_URI } = process.env
 
 const pool = new Pool({
-  connectionString: process.env.PG_URI
+  connectionString: PG_URI
 })
 
 const steps = [
@@ -234,4 +232,4 @@ const fetchScrimbaUser = async (discordId, channel) => {
 }
 
 const cleanup = channel => channel.delete()
-bot.login(process.env.TOKEN)
+bot.login(TOKEN)
