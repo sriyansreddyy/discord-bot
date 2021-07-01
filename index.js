@@ -8,7 +8,7 @@ const bot = new Client({
 })
 
 const WELCOME_PREFIX = '👋welcome-'
-const ONBOARDING_CATEGORY_ID = '857924654903984168'
+const ONBOARDING_CATEGORY_ID = '860224991122948126'
 const EVERYONE_ROLE_ID = '837036811825840129'
 const REGULAR_MEMBER_ROLE_ID = '855434174151262238'
 
@@ -40,7 +40,7 @@ const steps = [
     process: () => true
   },
   {
-    shouldSkip: () => true,
+    shouldSkip: async member => await findScrimbaUserByDiscordId(member.user.id),
     question: `Fantastic. To access the sever, please click this
     link to connect your Scrimba account: https://scrimba.com/discord/connect`,
     process: (answer, member, channel) => fetchScrimbaUser(member.id, channel),
@@ -102,7 +102,7 @@ const sendNextStep = async (
 
     console.log('member', member)
     console.log('member.avatar? ', member.avatar)
-    const shouldSkip = nextStep.shouldSkip?.(member)
+    const shouldSkip = await nextStep.shouldSkip?.(member)
     if (shouldSkip) {
       await sendNextStep(currentStepIndex, channel, member)
       return
@@ -197,6 +197,14 @@ const assignRegularMemberRole = member =>  member.roles.add(REGULAR_MEMBER_ROLE_
 
 const sendWelcomeDirectMessage = member => member.send('hi')
 
+const findScrimbaUserByDiscordId = async (discordId) => {
+  const { rows }  = await pool
+    .query(`SELECT * 
+          FROM USERS 
+          WHERE discord_id = '${discordId}'`)
+  const user = rows[0]
+  return user
+}
 const fetchScrimbaUser = async (discordId, channel) => {
   await channel.overwritePermissions([
     {
@@ -211,11 +219,7 @@ const fetchScrimbaUser = async (discordId, channel) => {
   ])
   return new Promise(resolve => {
     const interval = setInterval(async () => {
-      const { rows }  = await pool
-        .query(`SELECT * 
-          FROM USERS 
-          WHERE discord_id = '${discordId}'`)
-      const user = rows[0]
+      const user = await findScrimbaUserByDiscordId(discordId)
       if (user) {
         await channel.overwritePermissions([
           {

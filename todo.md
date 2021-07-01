@@ -20,3 +20,4 @@
 ## Refactoring
 - should refactor all arguments to take an arguments object
   since many are optional depending on the curcumstance
+- rename 'validate' and 'process' to 'before' and `after`?
