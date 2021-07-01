@@ -27,7 +27,7 @@ const steps = [
     process: async (answer, member) => await member.setNickname(answer)
   },
   {
-    shouldSkip: () => false,
+    shouldSkip: () => true,
     // todo: inform someone who found Discord before Scrimba
     // what Scrimba is about and how to make an account
     question: `Fantastic. To access the sever, please click this
@@ -91,7 +91,6 @@ const sendNextStep = async (
 
     const shouldSkip = nextStep.shouldSkip?.()
     if (shouldSkip) {
-      currentStepIndex += 1
       await sendNextStep(currentStepIndex, channel, member)
       return
     }
@@ -149,16 +148,9 @@ bot.on('message', async message => {
 
 bot.on('messageReactionAdd', async (messageReaction, user) => {
   const { 
-    // partial,
     message: { channel },
     emoji : { name: answer }
   } = messageReaction
-
-  // if (partial) {
-  //   // TODO: process partial messages if needed
-  //   console.error('partial', partial)
-  //   // await messageReaction.fetch()
-  // }
 
   if (channel.type !== "text" && !channel.name.startsWith(WELCOME_PREFIX)) {
     return
