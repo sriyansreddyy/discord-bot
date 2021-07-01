@@ -8,7 +8,13 @@ const bot = new Client({
 })
 
 const WELCOME_PREFIX = '👋welcome-'
-const { ONBOARDING_CATEGORY_ID, EVERYONE_ROLE_ID, REGULAR_MEMBER_ROLE_ID, TOKEN, PG_URI } = process.env
+const { 
+  ONBOARDING_CATEGORY_ID,
+  EVERYONE_ROLE_ID,
+  REGULAR_MEMBER_ROLE_ID,
+  TOKEN,
+  PG_URI 
+} = process.env
 
 const pool = new Pool({
   connectionString: PG_URI
