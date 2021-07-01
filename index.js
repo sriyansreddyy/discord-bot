@@ -47,7 +47,7 @@ const steps = [
   },
   {
     question: 'Watch this then https://youtu.be/lPIi430q5fk respond with the ✅',
-    reaction: '✅'
+    expectedReaction: '✅'
   }
 ]
 
@@ -104,8 +104,8 @@ const sendNextStep = async (
     }
 
     const message = await channel.send(nextStep.question)
-    if(nextStep.reaction) {
-      await message.react(nextStep.reaction)
+    if(nextStep.expectedReaction) {
+      await message.react(nextStep.expectedReaction)
     }
 
     if (nextStep.processImmediately) {
@@ -174,7 +174,7 @@ bot.on('messageReactionAdd', async (messageReaction, user) => {
   if (reactor === onboardee) {
     const { step, index } = await findCurrentStep(channel)
 
-    if (step.reaction && step.reaction !== answer)  {
+    if (step.expectedReaction && step.expectedReaction !== answer)  {
       return
     }
 
