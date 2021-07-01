@@ -28,8 +28,6 @@ const steps = [
   },
   {
     shouldSkip: () => true,
-    // todo: inform someone who found Discord before Scrimba
-    // what Scrimba is about and how to make an account
     question: `Fantastic. To access the sever, please click this
     link to connect your Scrimba account: https://scrimba.com/discord/connect`,
     process: (answer, member, channel) => fetchScrimbaUser(member.id, channel),
@@ -156,8 +154,6 @@ bot.on('messageReactionAdd', async (messageReaction, user) => {
     return
   }
   
-  // the reaction was added by the bot to make it easy for
-  // the user
   if (user.id === bot.user.id) {
     return
   }
@@ -172,9 +168,12 @@ bot.on('messageReactionAdd', async (messageReaction, user) => {
       return
     }
 
-    // messageReactionAdd only gives us a user so we need
-    // to find the guild member
-    const member = messageReaction.message.guild.members.cache.find(member => member.id === user.id)
+    const member = messageReaction
+      .message
+      .guild
+      .members
+      .cache
+      .find(member => member.id === user.id)
     await processAnswer(step, index, channel, member, answer)
   }
 })
@@ -211,7 +210,6 @@ const fetchScrimbaUser = async (discordId, channel) => {
           {
             id: discordId,
             allow: ['VIEW_CHANNEL']
-            // deny: ['SEND_MESSAGES']
           }
         ])
         resolve()
