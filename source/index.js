@@ -12,7 +12,7 @@ const {
   ONBOARDING_CATEGORY_ID,
   EVERYONE_ROLE_ID,
   REGULAR_MEMBER_ROLE_ID,
-  TOKEN,
+  DISCORD_BOT_TOKEN,
   PG_URI 
 } = process.env
 
@@ -31,6 +31,7 @@ const steps = [
     process: async (answer, member) => await member.setNickname(answer)
   }, 
   {
+    help: "❌ we need to know your avatar for these reasons blah blah",
     shouldSkip: member => member.user.avatar,
     validate: (answer, member) => {
       if (answer !== "OK") {
@@ -85,11 +86,12 @@ const findCurrentStep = async channel => {
   const messages = await channel.messages.fetch()
   const botMessages = messages
     .filter(message => message.author.id === bot.user.id)
-    .filter(message => !message.content.startsWith('❌'))
-  const question = botMessages.first().content
+    .filter(message => !message.content.includes('❌'))
+  const botMessage = botMessages.first()
+  const question = botMessage.content
   const index = steps.findIndex(step => step.question === question)
   const step = steps[index]
-  return { step, index }
+  return { step, index, botMessage}
 }
 
 const sendNextStep = async (
@@ -152,10 +154,15 @@ bot.on('message', async message => {
   const onboardee = channel.name.split("-")[1]
   const sender = `${author.username}_${author.discriminator}`
 
-  if (sender === onboardee) {
-    const { step, index } = await findCurrentStep(channel)
-    await processAnswer(step, index, channel, member, answer)
+  if (sender !== onboardee) {
+    return
   }
+  const { step, index } = await findCurrentStep(channel)
+  if (answer.toLowerCase() === "help") {
+    await channel.send(step.help)
+    return
+  }
+  await processAnswer(step, index, channel, member, answer)
 })
 
 bot.on('messageReactionAdd', async (messageReaction, user) => {
@@ -176,9 +183,10 @@ bot.on('messageReactionAdd', async (messageReaction, user) => {
   const reactor = `${user.username}_${user.discriminator}`
 
   if (reactor === onboardee) {
-    const { step, index } = await findCurrentStep(channel)
+    const { step, index, botMessage } = await findCurrentStep(channel)
 
     if (step.expectedReaction && step.expectedReaction !== answer)  {
+      await botMessage.reply(`❌ you reacted with ${answer} but we were looking for ${step.expectedReaction}`)
       return
     }
 
@@ -238,4 +246,4 @@ const fetchScrimbaUser = async (discordId, channel) => {
 }
 
 const cleanup = channel => channel.delete()
-bot.login(TOKEN)
+bot.login(DISCORD_BOT_TOKEN)
