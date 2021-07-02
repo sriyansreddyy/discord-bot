@@ -31,6 +31,7 @@ const steps = [
     process: async (answer, member) => await member.setNickname(answer)
   }, 
   {
+    help: "❌ we need to know your avatar for these reasons blah blah",
     shouldSkip: member => member.user.avatar,
     validate: (answer, member) => {
       if (answer !== "OK") {
@@ -152,10 +153,15 @@ bot.on('message', async message => {
   const onboardee = channel.name.split("-")[1]
   const sender = `${author.username}_${author.discriminator}`
 
-  if (sender === onboardee) {
-    const { step, index } = await findCurrentStep(channel)
-    await processAnswer(step, index, channel, member, answer)
+  if (sender !== onboardee) {
+    return
   }
+  const { step, index } = await findCurrentStep(channel)
+  if (answer.toLowerCase() === "help") {
+    await channel.send(step.help)
+    return
+  }
+  await processAnswer(step, index, channel, member, answer)
 })
 
 bot.on('messageReactionAdd', async (messageReaction, user) => {
