@@ -86,11 +86,12 @@ const findCurrentStep = async channel => {
   const messages = await channel.messages.fetch()
   const botMessages = messages
     .filter(message => message.author.id === bot.user.id)
-    .filter(message => !message.content.startsWith('❌'))
-  const question = botMessages.first().content
+    .filter(message => !message.content.includes('❌'))
+  const botMessage = botMessages.first()
+  const question = botMessage.content
   const index = steps.findIndex(step => step.question === question)
   const step = steps[index]
-  return { step, index }
+  return { step, index, botMessage}
 }
 
 const sendNextStep = async (
@@ -182,9 +183,10 @@ bot.on('messageReactionAdd', async (messageReaction, user) => {
   const reactor = `${user.username}_${user.discriminator}`
 
   if (reactor === onboardee) {
-    const { step, index } = await findCurrentStep(channel)
+    const { step, index, botMessage } = await findCurrentStep(channel)
 
     if (step.expectedReaction && step.expectedReaction !== answer)  {
+      await botMessage.reply(`❌ you reacted with ${answer} but we were looking for ${step.expectedReaction}`)
       return
     }
 
