@@ -51,7 +51,6 @@ const steps = [
     processImmediately: true,
   },
   {
-    help: '❌ sorry you need to click the emoji',
     question: 'Watch this then https://youtu.be/lPIi430q5fk respond with the ✅',
     expectedReaction: '✅'
   }
@@ -60,7 +59,7 @@ const steps = [
 bot.on('ready', async () => {
   console.log(`Logged in as ${bot.user.id}!`)
   startBeingHelpful()
-})
+});
 
 bot.on('guildMemberAdd', async member => {
   const channel = await member
@@ -250,68 +249,21 @@ const fetchScrimbaUser = async (discordId, channel) => {
 const cleanup = channel => channel.delete()
 bot.login(DISCORD_BOT_TOKEN)
 
-// offer help if no successful answer in 30 seconds
-// following the step 
-//
-// offer more help if no successful answer in 3 minutes
-// warn gonna kick after 5 minutes
-// kick after 5 minutes
-const beHelpful = async channel => {
-  console.log('beHelpful()')
-  const { step, botMessage } = await findCurrentStep(channel)
-
-  const millisecondsSinceQuestion = ((new Date()) - botMessage.createdAt)
-
-  console.log('millisecondsSinceQuestion', millisecondsSinceQuestion)
-
-  if (millisecondsSinceQuestion >= 20000) {
-    // await cleanup(channel)
-    return
-  }
-
-  if (millisecondsSinceQuestion >= 15000) {
-    await channel.send('❌ gonna delete the channel soon')
-    return
-  }
-
-  if (millisecondsSinceQuestion >= 10000) {
-    await channel.send('❌ looks like you\'re still having trouble 20 seconds later eek')
-    return
-  }
-
-  if (millisecondsSinceQuestion >= 5000) {
-    const help = step.help || '❌ you ok der?'
-    await channel.send(help)
-  }
-
-  // const ago = ((new Date()) - botMessage.createdAt)
 
 
-  // // const moreThanThirtySecondsAgo = ((new Date()) - botMessage.createdAt) > INTERVAL
-  // if (moreThanThirtySecondsAgo) {
-  //   const help = step.help || '❌ you ok der?'
-  //   const messages = await channel
-  //     .messages
-  //     .fetch()
-  //   console.log('messages', messages)
-  //   const some = messages
-  //     .some(message => message.content === help)
-  //   // if (some && message.sent > THREE_SECONDS * 2) {
-  //   //   console.log('already been helped')
-  //   // }
-  //   await channel.send(help)
-  // }
-}
-
-const INTERVAL = 5000
 const startBeingHelpful = () => {
   setInterval(() => {
-    bot
+    const channels = bot
       .channels
       .cache
+    channels
       .filter(channel => channel.name?.startsWith(WELCOME_PREFIX))
-      .forEach(beHelpful)
-  }, INTERVAL)
+      .forEach(async channel => {
+        const { step } = await findCurrentStep(channel)
+        console.log(`${channel.name} is on step ${step.question}`)
+      })
+    // console.log('welcomeChannels', welcomeChannels)
+  }, 3000)
 }
 
 
