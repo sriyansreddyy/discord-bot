@@ -23,25 +23,51 @@ const pool = new Pool({
 const steps = [
   {
     question: "Welcome to the Scrimba Discord! What should we call you?",
+    help: "❌ Hello <@812310101426831361>, what should I call you? Write below and press enter and you'll be on your way!",
     validate: answer => {
       if (answer.includes(' ')) {
         return `You wrote "${answer}" but that includes a space! What is your *first* name, please?`
       }
     },
-    process: async (answer, member) => await member.setNickname(answer)
+    process: async (answer, member) => await member.setNickname(answer),
+    processImmediately: true
   }, 
   {
     help: "❌ we need to know your avatar for these reasons blah blah",
     shouldSkip: member => member.user.avatar,
-    validate: (answer, member) => {
-      if (answer !== "OK") {
-        return "you didn not write OK"
-      }
-      if (!member.user.avatar) {
-        return "you wrote OK but you haven't set an avatar yet!"
-      }
+    question: 'Hi, I noticed you don\'t have an avatar. Please set one',
+    process: async (answer, member, channel) => {
+      await channel.overwritePermissions([
+        {
+          id: EVERYONE_ROLE_ID,
+          deny: ['VIEW_CHANNEL']
+        },
+        {
+          id: member.id,
+          allow: ['VIEW_CHANNEL'],
+          deny: ['SEND_MESSAGES']
+        }
+      ])
+      return new Promise(resolve => {
+        const interval = setInterval(async () => {
+          if (member.user.avatar) {
+            await channel.overwritePermissions([
+              {
+                id: EVERYONE_ROLE_ID,
+                deny: ['VIEW_CHANNEL']
+              },
+              {
+                id: member.id,
+                allow: ['VIEW_CHANNEL']
+              }
+            ])
+            resolve()
+            clearInterval(interval)
+          }
+        }, 1000)
+      })
     },
-    question: 'Hi, I noticed you don\'t have an avatar. Please set one then type OK'
+    processImmediately: true
   },
   {
     shouldSkip: async member => await findScrimbaUserByDiscordId(member.user.id),
@@ -59,7 +85,7 @@ const steps = [
 
 bot.on('ready', async () => {
   console.log(`Logged in as ${bot.user.id}!`)
-  startBeingHelpful()
+  // startBeingHelpful()
 })
 
 bot.on('guildMemberAdd', async member => {
@@ -259,32 +285,41 @@ bot.login(DISCORD_BOT_TOKEN)
 const beHelpful = async channel => {
   console.log('beHelpful()')
   const { step, botMessage } = await findCurrentStep(channel)
+  const onboardee = channel.name.split("-")[1]
+  console.log(onboardee)
 
   const millisecondsSinceQuestion = ((new Date()) - botMessage.createdAt)
 
   console.log('millisecondsSinceQuestion', millisecondsSinceQuestion)
+  const messages = await channel.messages.fetch()
 
-  if (millisecondsSinceQuestion >= 20000) {
-    // await cleanup(channel)
-    return
-  }
+  // if (millisecondsSinceQuestion >= 20000) {
+  //   // await cleanup(channel)
+  //   return
+  // }
+
+  // if (millisecondsSinceQuestion >= 15000) {
+  //   await channel.send('🤖 gonna delete the channel soon')
+  //   return
+  // }
+
+  // if (millisecondsSinceQuestion >= 10000) {
+  //   await channel.send('❌ looks like you\'re still having trouble 20 seconds later eek')
+  //   return
+  // }
 
   if (millisecondsSinceQuestion >= 15000) {
-    await channel.send('❌ gonna delete the channel soon')
-    return
-  }
-
-  if (millisecondsSinceQuestion >= 10000) {
-    await channel.send('❌ looks like you\'re still having trouble 20 seconds later eek')
-    return
-  }
-
-  if (millisecondsSinceQuestion >= 5000) {
-    const help = step.help || '❌ you ok der?'
-    await channel.send(help)
+    const help = step.help || `❌ you ok der?`
+    if (!messages.some(message => message.content === help)) {
+      await channel.send(help)
+    }  
   }
 
   // const ago = ((new Date()) - botMessage.createdAt)
+  // could check if this specific error has been sent
+  // could check what the most recent error is
+  // what if they get stuck on a future step? - could
+  // include question the message
 
 
   // // const moreThanThirtySecondsAgo = ((new Date()) - botMessage.createdAt) > INTERVAL
@@ -313,17 +348,3 @@ const startBeingHelpful = () => {
       .forEach(beHelpful)
   }, INTERVAL)
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
