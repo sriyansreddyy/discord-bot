@@ -70,7 +70,8 @@ const steps = [
     processImmediately: true
   },
   {
-    shouldSkip: async member => await findScrimbaUserByDiscordId(member.user.id),
+    shouldSkip: () => true,
+    // shouldSkip: async member => await findScrimbaUserByDiscordId(member.user.id),
     question: `Fantastic. To access the sever, please click this
     link to connect your Scrimba account: https://scrimba.com/discord/connect`,
     process: (answer, member, channel) => fetchScrimbaUser(member.id, channel),
@@ -85,7 +86,7 @@ const steps = [
 
 bot.on('ready', async () => {
   console.log(`Logged in as ${bot.user.id}!`)
-  // startBeingHelpful()
+  startBeingHelpful()
 })
 
 bot.on('guildMemberAdd', async member => {
@@ -276,12 +277,6 @@ const fetchScrimbaUser = async (discordId, channel) => {
 const cleanup = channel => channel.delete()
 bot.login(DISCORD_BOT_TOKEN)
 
-// offer help if no successful answer in 30 seconds
-// following the step 
-//
-// offer more help if no successful answer in 3 minutes
-// warn gonna kick after 5 minutes
-// kick after 5 minutes
 const beHelpful = async channel => {
   console.log('beHelpful()')
   const { step, botMessage } = await findCurrentStep(channel)
@@ -298,18 +293,15 @@ const beHelpful = async channel => {
   //   return
   // }
 
-  // if (millisecondsSinceQuestion >= 15000) {
-  //   await channel.send('🤖 gonna delete the channel soon')
-  //   return
-  // }
-
-  // if (millisecondsSinceQuestion >= 10000) {
-  //   await channel.send('❌ looks like you\'re still having trouble 20 seconds later eek')
-  //   return
-  // }
+  if (millisecondsSinceQuestion >= 30000) {
+    const help = `We haven't heard from you in ${millisecondsSinceQuestion} imilliseconds it's time to delete the channel`
+    if (!messages.some(message => message.content === help)) {
+      await channel.send(help)
+    }  
+  }
 
   if (millisecondsSinceQuestion >= 15000) {
-    const help = step.help || `❌ you ok der?`
+    const help = { step }
     if (!messages.some(message => message.content === help)) {
       await channel.send(help)
     }  
@@ -347,4 +339,5 @@ const startBeingHelpful = () => {
       .filter(channel => channel.name?.startsWith(WELCOME_PREFIX))
       .forEach(beHelpful)
   }, INTERVAL)
+
 }
