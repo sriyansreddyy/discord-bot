@@ -93,7 +93,7 @@ bot.on('guildMemberAdd', async member => {
   const channel = await member
     .guild
     .channels
-    .create(`${WELCOME_PREFIX}${member.user.username}_${member.user.discriminator}`, {
+    .create(`${WELCOME_PREFIX}${member.user.username}_${member.user.id}`, {
       parent: ONBOARDING_CATEGORY_ID,
       permissionOverwrites: [
         {
@@ -161,7 +161,7 @@ const processAnswer = async (
   answer) => {
   const error = currentStep.validate?.(answer, member)
   if (error) {
-    await channel.send(createError(error))
+    await channel.send(createError(error, channel))
     return
   }
   await currentStep.process?.(answer, member, channel)
@@ -181,7 +181,7 @@ bot.on('message', async message => {
   }
 
   const onboardee = channel.name.split("-")[1]
-  const sender = `${author.username}_${author.discriminator}`
+  const sender = `${author.username}_${author.id}`
 
   if (sender !== onboardee) {
     return
@@ -209,13 +209,13 @@ bot.on('messageReactionAdd', async (messageReaction, user) => {
   }
 
   const onboardee = channel.name.split("-")[1]
-  const reactor = `${user.username}_${user.discriminator}`
+  const reactor = `${user.username}_${user.id}`
 
   if (reactor === onboardee) {
     const { step, index, botMessage } = await findCurrentStep(channel)
 
     if (step.expectedReaction && step.expectedReaction !== answer)  {
-      await channel.send(createError(`you reacted with ${answer} but we were looking for ${step.expectedReaction}`))
+      await channel.send(createError(`you reacted with ${answer} but we were looking for ${step.expectedReaction}`, channel))
       return
     }
 
@@ -309,7 +309,7 @@ const beHelpful = async channel => {
 
   if (millisecondsSinceQuestion >= 15000) {
     const help = step.help || 'you ok lol?'
-    const error = createError(help)
+    const error = createError(help, channel)
     if (!messages.some(message => message.content === error)) {
       await channel.send(error)
     }  
@@ -349,4 +349,10 @@ const startBeingHelpful = () => {
   }, INTERVAL)
 }
 
-const createError = text => `❌ ${text}`
+const createError = (text, channel) => {
+  if (channel){
+    const onboardee = channel.name.split("_")[1]
+    return `❌ <@${onboardee}>, ${text}`
+  }
+  return `❌ ${text}`
+}
