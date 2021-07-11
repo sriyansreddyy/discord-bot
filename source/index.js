@@ -286,24 +286,33 @@ const beHelpful = async channel => {
   const onboardee = channel.name.split("-")[1]
   console.log(onboardee)
 
-  const millisecondsSinceQuestion = ((new Date()) - botMessage.createdAt)
+  const now = new Date()
+  const millisecondsSinceQuestion = now - botMessage.createdAt
+  const messages = await channel.messages.fetch()
+  // how can I know if the user hasn't said anything in a
+  // while if they never said anything ever?
+  const answer = messages.filter(message => message.author.id !== bot.user.id).first()
+  console.log("answer", answer.content)
+  // const millisecondsSinceAnswer = now - answer.createdAt
 
   console.log('millisecondsSinceQuestion', millisecondsSinceQuestion)
-  const messages = await channel.messages.fetch()
 
-  if (millisecondsSinceQuestion >= 15000) {
-    const help = { step }
-    if (!messages.some(message => message.content === help)) {
-      await channel.send(help)
-    }  
-  }
+  // if user not sent mesage in a while, warn then delete
+  // if user not answered correctly in a while, hint with
+  // help
+  // if (millisecondsSinceQuestion >= 30000) {
+  //   const help = "looks like you're not around"
+  //   if (!messages.some(message => message.content === help)) {
+  //     await channel.send(help)
+  //   }  
+  // }
 
-  if (millisecondsSinceQuestion >= 15000) {
-    const help = { step }
-    if (!messages.some(message => message.content === help)) {
-      await channel.send(help)
-    }  
-  }
+  // if (millisecondsSinceQuestion >= 15000) {
+  //   const help = { step }
+  //   if (!messages.some(message => message.content === help)) {
+  //     await channel.send(help)
+  //   }  
+  // }
 
   // const ago = ((new Date()) - botMessage.createdAt)
   // could check if this specific error has been sent
