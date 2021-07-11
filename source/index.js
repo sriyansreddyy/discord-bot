@@ -23,7 +23,7 @@ const pool = new Pool({
 const steps = [
   {
     question: "Welcome to the Scrimba Discord! What should we call you?",
-    help: "❌ Hello <@812310101426831361>, what should I call you? Write below and press enter and you'll be on your way!",
+    help: "Hello, what should I call you? Write below and press enter and you'll be on your way!",
     validate: answer => {
       if (answer.includes(' ')) {
         return `You wrote "${answer}" but that includes a space! What is your *first* name, please?`
@@ -33,7 +33,7 @@ const steps = [
     processImmediately: true
   }, 
   {
-    help: "❌ we need to know your avatar for these reasons blah blah",
+    help: "we need to know your avatar for these reasons blah blah",
     shouldSkip: member => member.user.avatar,
     question: 'Hi, I noticed you don\'t have an avatar. Please set one',
     process: async (answer, member, channel) => {
@@ -78,7 +78,7 @@ const steps = [
     processImmediately: true,
   },
   {
-    help: '❌ sorry you need to click the emoji',
+    help: 'sorry you need to click the emoji',
     question: 'Watch this then https://youtu.be/lPIi430q5fk respond with the ✅',
     expectedReaction: '✅'
   }
@@ -161,7 +161,7 @@ const processAnswer = async (
   answer) => {
   const error = currentStep.validate?.(answer, member)
   if (error) {
-    await channel.send(`❌ ${error}`)
+    await channel.send(createError(error))
     return
   }
   await currentStep.process?.(answer, member, channel)
@@ -215,7 +215,7 @@ bot.on('messageReactionAdd', async (messageReaction, user) => {
     const { step, index, botMessage } = await findCurrentStep(channel)
 
     if (step.expectedReaction && step.expectedReaction !== answer)  {
-      await botMessage.reply(`❌ you reacted with ${answer} but we were looking for ${step.expectedReaction}`)
+      await channel.send(createError(`you reacted with ${answer} but we were looking for ${step.expectedReaction}`))
       return
     }
 
@@ -291,9 +291,9 @@ const beHelpful = async channel => {
   const messages = await channel.messages.fetch()
   // how can I know if the user hasn't said anything in a
   // while if they never said anything ever?
-  const answer = messages.filter(message => message.author.id !== bot.user.id).first()
-  console.log("answer", answer.content)
-  // const millisecondsSinceAnswer = now - answer.createdAt
+  // const answer = messages.filter(message => message.author.id !== bot.user.id).first()
+  // console.log("answer", answer.content)
+  // // const millisecondsSinceAnswer = now - answer.createdAt
 
   console.log('millisecondsSinceQuestion', millisecondsSinceQuestion)
 
@@ -307,12 +307,13 @@ const beHelpful = async channel => {
   //   }  
   // }
 
-  // if (millisecondsSinceQuestion >= 15000) {
-  //   const help = { step }
-  //   if (!messages.some(message => message.content === help)) {
-  //     await channel.send(help)
-  //   }  
-  // }
+  if (millisecondsSinceQuestion >= 15000) {
+    const help = step.help || 'you ok lol?'
+    const error = createError(help)
+    if (!messages.some(message => message.content === error)) {
+      await channel.send(error)
+    }  
+  }
 
   // const ago = ((new Date()) - botMessage.createdAt)
   // could check if this specific error has been sent
@@ -346,5 +347,6 @@ const startBeingHelpful = () => {
       .filter(channel => channel.name?.startsWith(WELCOME_PREFIX))
       .forEach(beHelpful)
   }, INTERVAL)
-
 }
+
+const createError = text => `❌ ${text}`
