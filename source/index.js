@@ -277,6 +277,9 @@ const fetchScrimbaUser = async (discordId, channel) => {
 const cleanup = channel => channel.delete()
 bot.login(DISCORD_BOT_TOKEN)
 
+// TODO: Only check bot messages *since* the current step
+// before sending message; otherwise, the message won't send
+// if the user got stuck/solved the problem/got stuck again
 const beHelpful = async channel => {
   console.log('beHelpful()')
   const { step, botMessage } = await findCurrentStep(channel)
@@ -288,13 +291,8 @@ const beHelpful = async channel => {
   console.log('millisecondsSinceQuestion', millisecondsSinceQuestion)
   const messages = await channel.messages.fetch()
 
-  // if (millisecondsSinceQuestion >= 20000) {
-  //   // await cleanup(channel)
-  //   return
-  // }
-
-  if (millisecondsSinceQuestion >= 30000) {
-    const help = `We haven't heard from you in ${millisecondsSinceQuestion} imilliseconds it's time to delete the channel`
+  if (millisecondsSinceQuestion >= 15000) {
+    const help = { step }
     if (!messages.some(message => message.content === help)) {
       await channel.send(help)
     }  
