@@ -78,7 +78,6 @@ const steps = [
     processImmediately: true,
   },
   {
-    help: 'sorry you need to click the emoji',
     question: 'Watch this then https://youtu.be/lPIi430q5fk respond with the ✅',
     expectedReaction: '✅'
   }
@@ -277,65 +276,27 @@ const fetchScrimbaUser = async (discordId, channel) => {
 const cleanup = channel => channel.delete()
 bot.login(DISCORD_BOT_TOKEN)
 
-// TODO: Only check bot messages *since* the current step
-// before sending message; otherwise, the message won't send
-// if the user got stuck/solved the problem/got stuck again
+const validateSteps = () => {
+  // help message cannot be a duplicate
+  // help message should not start with a X
+  // question etc. should exist
+}
+validateSteps()
+
 const beHelpful = async channel => {
-  console.log('beHelpful()')
   const { step, botMessage } = await findCurrentStep(channel)
   const onboardee = channel.name.split("-")[1]
-  console.log(onboardee)
-
   const now = new Date()
   const millisecondsSinceQuestion = now - botMessage.createdAt
   const messages = await channel.messages.fetch()
-  // how can I know if the user hasn't said anything in a
-  // while if they never said anything ever?
-  // const answer = messages.filter(message => message.author.id !== bot.user.id).first()
-  // console.log("answer", answer.content)
-  // // const millisecondsSinceAnswer = now - answer.createdAt
 
-  console.log('millisecondsSinceQuestion', millisecondsSinceQuestion)
-
-  // if user not sent mesage in a while, warn then delete
-  // if user not answered correctly in a while, hint with
-  // help
-  // if (millisecondsSinceQuestion >= 30000) {
-  //   const help = "looks like you're not around"
-  //   if (!messages.some(message => message.content === help)) {
-  //     await channel.send(help)
-  //   }  
-  // }
-
-  if (millisecondsSinceQuestion >= 15000) {
-    const help = step.help || 'you ok lol?'
-    const error = createError(help, channel)
+  if (step.help && millisecondsSinceQuestion >= 10000) {
+    const error = createError(step.help, channel)
     if (!messages.some(message => message.content === error)) {
       await channel.send(error)
     }  
   }
 
-  // const ago = ((new Date()) - botMessage.createdAt)
-  // could check if this specific error has been sent
-  // could check what the most recent error is
-  // what if they get stuck on a future step? - could
-  // include question the message
-
-
-  // // const moreThanThirtySecondsAgo = ((new Date()) - botMessage.createdAt) > INTERVAL
-  // if (moreThanThirtySecondsAgo) {
-  //   const help = step.help || '❌ you ok der?'
-  //   const messages = await channel
-  //     .messages
-  //     .fetch()
-  //   console.log('messages', messages)
-  //   const some = messages
-  //     .some(message => message.content === help)
-  //   // if (some && message.sent > THREE_SECONDS * 2) {
-  //   //   console.log('already been helped')
-  //   // }
-  //   await channel.send(help)
-  // }
 }
 
 const INTERVAL = 5000
