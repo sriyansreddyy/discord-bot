@@ -309,7 +309,7 @@ validateSteps()
 
 const beHelpful = async channel => {
   const { step, botMessage } = await findCurrentStep(channel)
-  // const onboardeeId = channel.name.split("_")[1]
+  const onboardeeId = channel.name.split("_")[1]
   const now = new Date()
   const millisecondsSinceQuestion = now - botMessage.createdAt
   const messages = await channel
@@ -322,8 +322,16 @@ const beHelpful = async channel => {
     const error = createError("it's been 40 seconds so buh buy", channel)
     if (!x.some(message => message.content === error)) {
       await channel.send(error)
+      await cleanup(channel)
+
+      const guild = bot.guilds.cache.first()
+      const member = guild
+        .members
+        .cache
+        .find(member => member.id === onboardeeId)
+      await member.kick('did not complete onboarding within 40 seconds - what a noob!')
+      return
     }
-    return
   }
 
   if (millisecondsSinceQuestion >= 20000) {
