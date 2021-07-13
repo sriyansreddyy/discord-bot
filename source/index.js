@@ -20,6 +20,15 @@ const pool = new Pool({
   connectionString: PG_URI
 })
 
+const findGuildMemberById = memberId => {
+  const guild = bot.guilds.cache.first()
+  const member = guild
+    .members
+    .cache
+    .find(member => member.id === memberId)
+  return member
+}
+
 const steps = [
   {
     question: "Welcome to the Scrimba Discord! What should we call you?",
@@ -231,12 +240,7 @@ bot.on('messageReactionAdd', async (messageReaction, user) => {
     }
 
     await enableInput(channel, user.id)
-    const member = messageReaction
-      .message
-      .guild
-      .members
-      .cache
-      .find(member => member.id === user.id)
+    const member = findGuildMemberById(user.id)
     await processAnswer(step, index, channel, member, answer)
   }
 })
@@ -294,11 +298,7 @@ const beHelpful = async channel => {
       await channel.send(error)
       await cleanup(channel)
 
-      const guild = bot.guilds.cache.first()
-      const member = guild
-        .members
-        .cache
-        .find(member => member.id === onboardeeId)
+      const member = findGuildMemberById(onboardeeId)
       await member.kick('did not complete onboarding within 40 seconds - what a noob!')
       return
     }
