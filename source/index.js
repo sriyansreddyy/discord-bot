@@ -80,7 +80,10 @@ const steps = [
   {
     question: 'Watch this then https://youtu.be/lPIi430q5fk respond with the ✅',
     expectedReaction: '✅'
-  }
+  },
+  {
+    question: "write anything to proceed"
+  }, 
 ]
 
 bot.on('ready', async () => {
@@ -139,6 +142,17 @@ const sendNextStep = async (
 
     const message = await channel.send(nextStep.question)
     if(nextStep.expectedReaction) {
+      await channel.overwritePermissions([
+        {
+          id: EVERYONE_ROLE_ID,
+          deny: ['VIEW_CHANNEL']
+        },
+        {
+          id: member.id,
+          allow: ['VIEW_CHANNEL'],
+          deny: ['SEND_MESSAGES']
+        }
+      ])
       await message.react(nextStep.expectedReaction)
     }
 
@@ -218,6 +232,16 @@ bot.on('messageReactionAdd', async (messageReaction, user) => {
       return
     }
 
+    await channel.overwritePermissions([
+      {
+        id: EVERYONE_ROLE_ID,
+        deny: ['VIEW_CHANNEL']
+      },
+      {
+        id: user.id,
+        allow: ['VIEW_CHANNEL']
+      }
+    ])
     const member = messageReaction
       .message
       .guild
