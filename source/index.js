@@ -285,10 +285,19 @@ validateSteps()
 
 const beHelpful = async channel => {
   const { step, botMessage } = await findCurrentStep(channel)
-  const onboardee = channel.name.split("-")[1]
+  const onboardeeId = channel.name.split("_")[1]
   const now = new Date()
   const millisecondsSinceQuestion = now - botMessage.createdAt
   const messages = await channel.messages.fetch()
+
+  const userMessages = messages
+    .filter(message => message.author.id === onboardeeId)
+  const lastMessage = userMessages.first()
+  if (millisecondsSinceQuestion >= 20000 && lastMessage.createdAt >= 20000) {
+    console.log("question was asked 20 seconds ago and no attempt to answer in 20 seconds, time to shutdown?")
+    return
+  }
+
 
   if (step.help && millisecondsSinceQuestion >= 10000) {
     const error = createError(step.help, channel)
@@ -296,6 +305,7 @@ const beHelpful = async channel => {
       await channel.send(error)
     }  
   }
+
 
 }
 
