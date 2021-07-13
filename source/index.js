@@ -37,30 +37,11 @@ const steps = [
     shouldSkip: member => member.user.avatar,
     question: 'Hi, I noticed you don\'t have an avatar. Please set one',
     process: async (answer, member, channel) => {
-      await channel.overwritePermissions([
-        {
-          id: EVERYONE_ROLE_ID,
-          deny: ['VIEW_CHANNEL']
-        },
-        {
-          id: member.id,
-          allow: ['VIEW_CHANNEL'],
-          deny: ['SEND_MESSAGES']
-        }
-      ])
+      await disableInput(channel, member.id)
       return new Promise(resolve => {
         const interval = setInterval(async () => {
           if (member.user.avatar) {
-            await channel.overwritePermissions([
-              {
-                id: EVERYONE_ROLE_ID,
-                deny: ['VIEW_CHANNEL']
-              },
-              {
-                id: member.id,
-                allow: ['VIEW_CHANNEL']
-              }
-            ])
+            await enableInput(channel, member.id)
             resolve()
             clearInterval(interval)
           }
@@ -125,6 +106,33 @@ const findCurrentStep = async channel => {
   return { step, index, botMessage}
 }
 
+const disableInput = async (channel, memberId) => {
+  await channel.overwritePermissions([
+    {
+      id: EVERYONE_ROLE_ID,
+      deny: ['VIEW_CHANNEL']
+    },
+    {
+      id: memberId,
+      allow: ['VIEW_CHANNEL'],
+      deny: ['SEND_MESSAGES']
+    }
+  ])
+}
+
+const enableInput = async (channel, memberId) => {
+  await channel.overwritePermissions([
+    {
+      id: EVERYONE_ROLE_ID,
+      deny: ['VIEW_CHANNEL']
+    },
+    {
+      id: memberId,
+      allow: ['VIEW_CHANNEL']
+    }
+  ])
+}
+
 const sendNextStep = async (
   currentStepIndex,
   channel,
@@ -142,17 +150,7 @@ const sendNextStep = async (
 
     const message = await channel.send(nextStep.question)
     if(nextStep.expectedReaction) {
-      await channel.overwritePermissions([
-        {
-          id: EVERYONE_ROLE_ID,
-          deny: ['VIEW_CHANNEL']
-        },
-        {
-          id: member.id,
-          allow: ['VIEW_CHANNEL'],
-          deny: ['SEND_MESSAGES']
-        }
-      ])
+      await disableInput(channel, member.id)
       await message.react(nextStep.expectedReaction)
     }
 
@@ -232,16 +230,7 @@ bot.on('messageReactionAdd', async (messageReaction, user) => {
       return
     }
 
-    await channel.overwritePermissions([
-      {
-        id: EVERYONE_ROLE_ID,
-        deny: ['VIEW_CHANNEL']
-      },
-      {
-        id: user.id,
-        allow: ['VIEW_CHANNEL']
-      }
-    ])
+    await enableInput(channel, user.id)
     const member = messageReaction
       .message
       .guild
@@ -265,31 +254,12 @@ const findScrimbaUserByDiscordId = async (discordId) => {
   return user
 }
 const fetchScrimbaUser = async (discordId, channel) => {
-  await channel.overwritePermissions([
-    {
-      id: EVERYONE_ROLE_ID,
-      deny: ['VIEW_CHANNEL']
-    },
-    {
-      id: discordId,
-      allow: ['VIEW_CHANNEL'],
-      deny: ['SEND_MESSAGES']
-    }
-  ])
+  await disableInput(channel, discordId)
   return new Promise(resolve => {
     const interval = setInterval(async () => {
       const user = await findScrimbaUserByDiscordId(discordId)
       if (user) {
-        await channel.overwritePermissions([
-          {
-            id: EVERYONE_ROLE_ID,
-            deny: ['VIEW_CHANNEL']
-          },
-          {
-            id: discordId,
-            allow: ['VIEW_CHANNEL']
-          }
-        ])
+        await enableInput(channel, discordId)
         resolve()
         clearInterval(interval)
       }
@@ -349,8 +319,6 @@ const beHelpful = async channel => {
       await channel.send(error)
     }  
   }
-
-
 }
 
 const INTERVAL = 5000
