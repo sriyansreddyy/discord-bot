@@ -309,23 +309,35 @@ validateSteps()
 
 const beHelpful = async channel => {
   const { step, botMessage } = await findCurrentStep(channel)
-  const onboardeeId = channel.name.split("_")[1]
+  // const onboardeeId = channel.name.split("_")[1]
   const now = new Date()
   const millisecondsSinceQuestion = now - botMessage.createdAt
-  const messages = await channel.messages.fetch()
+  const messages = await channel
+    .messages
+    .fetch()
+  const x = messages.filter(message => message.createdAt > botMessage.createdAt)
 
-  const userMessages = messages
-    .filter(message => message.author.id === onboardeeId)
-  const lastMessage = userMessages.first()
-  if (millisecondsSinceQuestion >= 20000 && lastMessage.createdAt >= 20000) {
-    console.log("question was asked 20 seconds ago and no attempt to answer in 20 seconds, time to shutdown?")
+  console.log("seconds since question", millisecondsSinceQuestion / 1000)
+  if (millisecondsSinceQuestion >= 40000) {
+    const error = createError("it's been 40 seconds so buh buy", channel)
+    if (!x.some(message => message.content === error)) {
+      await channel.send(error)
+    }
+    return
+  }
+
+  if (millisecondsSinceQuestion >= 20000) {
+    const error = createError("it's been 20 seconds and you haven't got the answer right. in 20 more seconds, you will be ejected", channel)
+    if (!x.some(message => message.content === error)) {
+      await channel.send(error)
+    }  
     return
   }
 
 
   if (step.help && millisecondsSinceQuestion >= 10000) {
     const error = createError(step.help, channel)
-    if (!messages.some(message => message.content === error)) {
+    if (!x.some(message => message.content === error)) {
       await channel.send(error)
     }  
   }
