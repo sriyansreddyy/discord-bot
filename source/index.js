@@ -298,32 +298,26 @@ const beHelpful = async channel => {
   const messages = await channel
     .messages
     .fetch()
-  const x = messages.filter(message => message.createdAt > botMessage.createdAt)
-
+  const messagesSinceQuestion = messages.filter(message => message.createdAt > botMessage.createdAt)
   console.log("seconds since question", millisecondsSinceQuestion / 1000)
+
   if (millisecondsSinceQuestion >= 40000) {
-    const error = createError("it's been 40 seconds so buh buy", channel)
-    if (!x.some(message => message.content === error)) {
-      await channel.send(error)
-      // await cleanup(channel)
-      const member = findGuildMemberById(onboardeeId)
-      await member.kick('did not complete onboarding within 40 seconds - what a noob!')
-      return
-    }
+    const member = findGuildMemberById(onboardeeId)
+    await member.kick()
+    return
   }
 
   if (millisecondsSinceQuestion >= 20000) {
     const error = createError("it's been 20 seconds and you haven't got the answer right. in 20 more seconds, you will be ejected", channel)
-    if (!x.some(message => message.content === error)) {
+    if (!messagesSinceQuestion.some(message => message.content === error)) {
       await channel.send(error)
     }  
     return
   }
 
-
   if (step.help && millisecondsSinceQuestion >= 10000) {
     const error = createError(step.help, channel)
-    if (!x.some(message => message.content === error)) {
+    if (!messagesSinceQuestion.some(message => message.content === error)) {
       await channel.send(error)
     }  
   }
