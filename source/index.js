@@ -81,6 +81,15 @@ bot.on('ready', async () => {
   startBeingHelpful()
 })
 
+bot.on('guildMemberRemove', async member => {
+  console.log('guildMemberRemove')
+  const channel = bot
+    .channels
+    .cache
+    .find(channel => channel.name?.startsWith(WELCOME_PREFIX) && channel.name.split('_')[1] === member.id)
+  await cleanup(channel)
+})
+
 bot.on('guildMemberAdd', async member => {
   const channel = await member
     .guild
@@ -296,8 +305,7 @@ const beHelpful = async channel => {
     const error = createError("it's been 40 seconds so buh buy", channel)
     if (!x.some(message => message.content === error)) {
       await channel.send(error)
-      await cleanup(channel)
-
+      // await cleanup(channel)
       const member = findGuildMemberById(onboardeeId)
       await member.kick('did not complete onboarding within 40 seconds - what a noob!')
       return
