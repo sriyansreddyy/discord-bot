@@ -84,6 +84,12 @@ const foo = () => {
     .forEach(async channel => {
       const onboardee = channel.name.split('_')[1]
       const member = findGuildMemberById(onboardee)
+      if (!member) {
+        // they probably left the server
+        console.log('member left between restart, deleting channel')
+        await cleanup(channel)
+        return
+      }
       const { step, index } = await findCurrentStep(channel)
       if(step.processImmediately) {
         await processAnswer(step, index, channel, member, '')
