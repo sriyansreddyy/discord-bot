@@ -76,9 +76,25 @@ const steps = [
   }, 
 ]
 
+const foo = () => {
+  bot
+    .channels
+    .cache
+    .filter(channel => channel.name?.startsWith(WELCOME_PREFIX))
+    .forEach(async channel => {
+      const onboardee = channel.name.split('_')[1]
+      const member = findGuildMemberById(onboardee)
+      const { step, index } = await findCurrentStep(channel)
+      if(step.processImmediately) {
+        await processAnswer(step, index, channel, member, '')
+      }
+    })
+}
+
 bot.on('ready', async () => {
   console.log(`Logged in as ${bot.user.id}!`)
   startBeingHelpful()
+  foo()
 })
 
 bot.on('guildMemberRemove', async member => {
@@ -114,6 +130,7 @@ bot.on('guildMemberAdd', async member => {
 })
 
 const findCurrentStep = async channel => {
+
   const messages = await channel.messages.fetch()
   const botMessages = messages
     .filter(message => message.author.id === bot.user.id)
@@ -302,13 +319,13 @@ const beHelpful = async channel => {
   const messagesSinceQuestion = messages.filter(message => message.createdAt > botMessage.createdAt)
   console.log("seconds since question", millisecondsSinceQuestion / 1000)
 
-  if (millisecondsSinceQuestion >= 40000) {
+  if (millisecondsSinceQuestion >= 600000) {
     const member = findGuildMemberById(onboardeeId)
     await member.kick()
     return
   }
 
-  if (millisecondsSinceQuestion >= 20000) {
+  if (millisecondsSinceQuestion >= 240000) {
     const error = createError("it's been 20 seconds and you haven't got the answer right. in 20 more seconds, you will be ejected", channel)
     if (!messagesSinceQuestion.some(message => message.content === error)) {
       await channel.send(error)
@@ -316,7 +333,7 @@ const beHelpful = async channel => {
     return
   }
 
-  if (step.help && millisecondsSinceQuestion >= 10000) {
+  if (step.help && millisecondsSinceQuestion >= 120000) {
     const error = createError(step.help, channel)
     if (!messagesSinceQuestion.some(message => message.content === error)) {
       await channel.send(error)
