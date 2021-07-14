@@ -20,13 +20,16 @@ const pool = new Pool({
   connectionString: PG_URI
 })
 
-const findGuildMemberById = memberId => {
+const extractOnboardeeIdFromChannelName = channelName => channelName.split('_')[1]
+
+const getOnboardeeFromChannel = channel => {
   const guild = bot.guilds.cache.first()
-  const member = guild
+  const onboardeeId = extractOnboardeeIdFromChannelName(channel.name)
+  const onboardee = guild
     .members
     .cache
-    .find(member => member.id === memberId)
-  return member
+    .find(member => member.id === onboardeeId)
+  return onboardee
 }
 
 const steps = [
@@ -82,8 +85,7 @@ const foo = () => {
     .cache
     .filter(channel => channel.name?.startsWith(WELCOME_PREFIX))
     .forEach(async channel => {
-      const onboardee = channel.name.split('_')[1]
-      const member = findGuildMemberById(onboardee)
+      const member = getOnboardeeFromChannel(channel)
       if (!member) {
         // they probably left the server
         console.log('member left between restart, deleting channel')
@@ -107,7 +109,7 @@ bot.on('guildMemberRemove', async member => {
   const channel = bot
     .channels
     .cache
-    .find(channel => channel.name?.startsWith(WELCOME_PREFIX) && channel.name.split('_')[1] === member.id)
+    .find(channel => channel.name?.startsWith(WELCOME_PREFIX) && extractOnboardeeIdFromChannelName(channel.name) === member.id)
   if (channel) {
     await cleanup(channel)
   }
@@ -233,8 +235,8 @@ bot.on('message', async message => {
     return
   }
 
-  const onboardee = channel.name.split("-")[1]
-  const sender = `${author.username}_${author.id}`
+  const onboardee = extractOnboardeeIdFromChannelName(channel.name)
+  const sender = author.id
 
   if (sender !== onboardee) {
     return
@@ -261,8 +263,8 @@ bot.on('messageReactionAdd', async (messageReaction, user) => {
     return
   }
 
-  const onboardee = channel.name.split("-")[1]
-  const reactor = `${user.username}_${user.id}`
+  const onboardee = extractOnboardeeIdFromChannelName(channel.name)
+  const reactor = user.id
 
   if (reactor === onboardee) {
     const { step, index } = await findCurrentStep(channel)
@@ -273,7 +275,7 @@ bot.on('messageReactionAdd', async (messageReaction, user) => {
     }
 
     await enableInput(channel, user.id)
-    const member = findGuildMemberById(user.id)
+    const member = getOnboardeeFromChannel(channel)
     await processAnswer(step, index, channel, member, answer)
   }
 })
@@ -315,8 +317,9 @@ const validateSteps = () => {
 validateSteps()
 
 const beHelpful = async channel => {
+  // might need to check if channel exists(might have been
+  // deleted within a few seconds)
   const { step, botMessage } = await findCurrentStep(channel)
-  const onboardeeId = channel.name.split("_")[1]
   const now = new Date()
   const millisecondsSinceQuestion = now - botMessage.createdAt
   const messages = await channel
@@ -326,7 +329,7 @@ const beHelpful = async channel => {
   console.log("seconds since question", millisecondsSinceQuestion / 1000)
 
   if (millisecondsSinceQuestion >= 600000) {
-    const member = findGuildMemberById(onboardeeId)
+    const member = getOnboardeeFromChannel(channel)
     await member.kick()
     return
   }
@@ -360,8 +363,8 @@ const startBeingHelpful = () => {
 
 const createError = (text, channel) => {
   if (channel){
-    const onboardee = channel.name.split("_")[1]
-    return `❌ <@${onboardee}>, ${text}`
+    const onboardeeId = extractOnboardeeIdFromChannelName(channel.name)
+    return `❌ <@${onboardeeId}>, ${text}`
   }
   return `❌ ${text}`
 }
