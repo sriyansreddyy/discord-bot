@@ -82,12 +82,13 @@ bot.on('ready', async () => {
 })
 
 bot.on('guildMemberRemove', async member => {
-  console.log('guildMemberRemove')
   const channel = bot
     .channels
     .cache
     .find(channel => channel.name?.startsWith(WELCOME_PREFIX) && channel.name.split('_')[1] === member.id)
-  await cleanup(channel)
+  if (channel) {
+    await cleanup(channel)
+  }
 })
 
 bot.on('guildMemberAdd', async member => {
