@@ -34,7 +34,7 @@ const getOnboardeeFromChannel = channel => {
 
 const steps = [
   {
-    question: "Welcome to the Scrimba Discord! What should we call you?",
+    question: 'What\'s your first name?',
     help: "Hello, what should I call you? Write below and press enter and you'll be on your way!",
     validate: answer => {
       if (answer.includes(' ')) {
