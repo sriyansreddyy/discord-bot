@@ -41,8 +41,7 @@ const steps = [
         return `You wrote "${answer}" but that includes a space! What is your *first* name, please?`
       }
     },
-    process: async (answer, member) => await member.setNickname(answer),
-    processImmediately: true
+    process: async (answer, member) => await member.setNickname(answer)
   }, 
   {
     help: "we need to know your avatar for these reasons blah blah",
@@ -63,8 +62,10 @@ const steps = [
     processImmediately: true
   },
   {
-    shouldSkip: () => true,
-    // shouldSkip: async member => await findScrimbaUserByDiscordId(member.user.id),
+    shouldSkip: async member => {
+      console.log('shouldSkip?')
+      return await findScrimbaUserByDiscordId(member.user.id)
+    },
     question: `Fantastic. To access the sever, please click this
     link to connect your Scrimba account: https://scrimba.com/discord/connect`,
     process: (answer, member, channel) => fetchScrimbaUser(member.id, channel),
@@ -73,10 +74,7 @@ const steps = [
   {
     question: 'Watch this then https://youtu.be/lPIi430q5fk respond with the ✅',
     expectedReaction: '✅'
-  },
-  {
-    question: "write anything to proceed"
-  }, 
+  }
 ]
 
 const foo = () => {
@@ -93,6 +91,7 @@ const foo = () => {
         return
       }
       const { step, index } = await findCurrentStep(channel)
+      console.log("step", step)
       if(step.processImmediately) {
         await processAnswer(step, index, channel, member, '')
       }
@@ -285,14 +284,21 @@ const assignRegularMemberRole = member =>  member.roles.add(REGULAR_MEMBER_ROLE_
 const sendWelcomeDirectMessage = member => member.send('hi')
 
 const findScrimbaUserByDiscordId = async (discordId) => {
-  const { rows }  = await pool
-    .query(`SELECT * 
-          FROM USERS 
-          WHERE discord_id = '${discordId}'`)
-  const user = rows[0]
-  return user
+  try {
+    const { rows }  = await pool
+      .query(`SELECT * 
+            FROM USERS 
+            WHERE discord_id = '${discordId}'`)
+    const user = rows[0]
+    return user
+  } catch (error) {
+    console.error(error)
+    process.exit(1)
+  }
 }
+
 const fetchScrimbaUser = async (discordId, channel) => {
+  console.log('fetchScrimbaUser')
   await disableInput(channel, discordId)
   return new Promise(resolve => {
     const interval = setInterval(async () => {
@@ -326,7 +332,7 @@ const beHelpful = async channel => {
     .messages
     .fetch()
   const messagesSinceQuestion = messages.filter(message => message.createdAt > botMessage.createdAt)
-  console.log("seconds since question", millisecondsSinceQuestion / 1000)
+  // console.log("seconds since question", millisecondsSinceQuestion / 1000)
 
   if (millisecondsSinceQuestion >= 600000) {
     const member = getOnboardeeFromChannel(channel)
