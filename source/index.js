@@ -34,19 +34,27 @@ const getOnboardeeFromChannel = channel => {
 
 const steps = [
   {
-    question: 'What\'s your first name?',
-    help: "Hello, what should I call you? Write below and press enter and you'll be on your way!",
+    question: `Welcome to the Scrimba Discord 👋! This is a coding community for Scrimba users and aspiring web developers. 
+
+Right now, you can only see a couple of channels 😢. There are *a lot* more channels to see! You'll unlock access in just a moment but first, please complete the onboarding.
+
+To get this party started, **what is your first name?**`,
+    help: `it's been a few minutes and I still don't know your name 👉🥺👈.
+
+If something is the matter, message <@425243762151915523>; otherwise, please write your name below and press ENTER to continue.`,
     validate: answer => {
       if (answer.includes(' ')) {
-        return `You wrote "${answer}" but that includes a space! What is your *first* name, please?`
+        return `you wrote "${answer}" but that answer includes a space. What is your *first* name, please?`
       }
     },
     process: async (answer, member) => await member.setNickname(answer)
   }, 
   {
-    help: "we need to know your avatar for these reasons blah blah",
+    help: "**Please take a moment to set a Discord profile piture**. Not sure how? Check out this article, https://www.businessinsider.com/how-to-change-discord-picture?r=US&IR=T",
     shouldSkip: member => member.user.avatar,
-    question: 'Hi, I noticed you don\'t have an avatar. Please set one',
+    question: `Hold up a second ✋ Please take a moment to set a Discord profile picture - it makes the communication feel more personal.  https://i.imgur.com/MiS7VB5.png
+
+When you set your Discord profile picture, you will automatically proceed to the next step.`,
     process: async (answer, member, channel) => {
       await disableInput(channel, member.id)
       return new Promise(resolve => {
@@ -66,13 +74,20 @@ const steps = [
       console.log('shouldSkip?')
       return await findScrimbaUserByDiscordId(member.user.id)
     },
-    question: `Fantastic. To access the sever, please click this
-    link to connect your Scrimba account: https://scrimba.com/discord/connect`,
+    question: `Fantastik 🎉🇳🇴!
+
+Next, please take a moment to connect your Scrimba and Discord accounts: https://scrimba.com/discord/connect
+
+When you click **Authorize**, you will automatically proceed to the next step.`,
     process: (answer, member, channel) => fetchScrimbaUser(member.id, channel),
     processImmediately: true,
   },
   {
-    question: 'Watch this then https://youtu.be/lPIi430q5fk respond with the ✅',
+    question: `Are as good at centring CSS elements as you are onboarding? Nicely done 👍!
+
+We made a video to welcome you to the community and tell you about our community values: https://youtu.be/lPIi430q5fk
+
+To complete the onboarding and unlock the Scrimba Discord server in all it's glory, **react to this message with the ✅ emoji if you agree to uphold our community values**.`,
     expectedReaction: '✅'
   }
 ]
@@ -137,7 +152,6 @@ bot.on('guildMemberAdd', async member => {
 })
 
 const findCurrentStep = async channel => {
-
   const messages = await channel.messages.fetch()
   const botMessages = messages
     .filter(message => message.author.id === bot.user.id)
@@ -332,7 +346,7 @@ const beHelpful = async channel => {
     .messages
     .fetch()
   const messagesSinceQuestion = messages.filter(message => message.createdAt > botMessage.createdAt)
-  // console.log("seconds since question", millisecondsSinceQuestion / 1000)
+  console.log("seconds since question", millisecondsSinceQuestion / 1000)
 
   if (millisecondsSinceQuestion >= 600000) {
     const member = getOnboardeeFromChannel(channel)
@@ -348,7 +362,7 @@ const beHelpful = async channel => {
     return
   }
 
-  if (step.help && millisecondsSinceQuestion >= 120000) {
+  if (step.help && millisecondsSinceQuestion >= 60000) {
     const error = createError(step.help, channel)
     if (!messagesSinceQuestion.some(message => message.content === error)) {
       await channel.send(error)
