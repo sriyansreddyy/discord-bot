@@ -7,6 +7,10 @@ const bot = new Client({
   partials: ['MESSAGE', 'REACTION']
 })
 
+const MILLISECONDS_BEFORE_OFFERING_HELP = 30000
+const MILLISECONDS_BEFORE_KICK_WARNING = 60000
+const MILLISECONDS_BEFORE_KICKING = 80000
+
 const WELCOME_PREFIX = '👋welcome-'
 const { 
   ONBOARDING_CATEGORY_ID,
@@ -83,7 +87,7 @@ When you click **Authorize**, you will automatically proceed to the next step.`,
     processImmediately: true,
   },
   {
-    question: `Are as good at centring CSS elements as you are onboarding? Nicely done 👍!
+    question: `Are as good at centring CSS elements as you are onboarding 🤩? Nicely done 👍!
 
 We made a video to welcome you to the community and tell you about our community values: https://youtu.be/lPIi430q5fk
 
@@ -346,23 +350,25 @@ const beHelpful = async channel => {
     .messages
     .fetch()
   const messagesSinceQuestion = messages.filter(message => message.createdAt > botMessage.createdAt)
-  console.log("seconds since question", millisecondsSinceQuestion / 1000)
+  console.log("milliseconds since question", millisecondsSinceQuestion)
 
-  if (millisecondsSinceQuestion >= 600000) {
+  if (millisecondsSinceQuestion >= MILLISECONDS_BEFORE_KICKING) {
     const member = getOnboardeeFromChannel(channel)
     await member.kick()
     return
   }
 
-  if (millisecondsSinceQuestion >= 240000) {
-    const error = createError("it's been 20 seconds and you haven't got the answer right. in 20 more seconds, you will be ejected", channel)
+  if (millisecondsSinceQuestion >= MILLISECONDS_BEFORE_KICK_WARNING) {
+    const error = createError(`you've been on this step for quite some time (${MILLISECONDS_BEFORE_KICK_WARNING} milliseconds).
+
+If you're still on this step in ${MILLISECONDS_BEFORE_KICKING - MILLISECONDS_BEFORE_KICK_WARNING} milliseconds, I will remove you from the server. Don't worry! You an always join again and attempt the onboarding.`, channel)
     if (!messagesSinceQuestion.some(message => message.content === error)) {
       await channel.send(error)
     }  
     return
   }
 
-  if (step.help && millisecondsSinceQuestion >= 60000) {
+  if (step.help && millisecondsSinceQuestion >= MILLISECONDS_BEFORE_OFFERING_HELP) {
     const error = createError(step.help, channel)
     if (!messagesSinceQuestion.some(message => message.content === error)) {
       await channel.send(error)
