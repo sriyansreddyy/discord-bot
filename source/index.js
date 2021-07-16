@@ -333,13 +333,6 @@ const fetchScrimbaUser = async (discordId, channel) => {
 const cleanup = channel => channel.delete()
 bot.login(DISCORD_BOT_TOKEN)
 
-const validateSteps = () => {
-  // help message cannot be a duplicate
-  // help message should not start with a X
-  // question etc. should exist
-}
-validateSteps()
-
 const beHelpful = async channel => {
   // might need to check if channel exists(might have been
   // deleted within a few seconds)
