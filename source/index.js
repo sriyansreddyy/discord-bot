@@ -304,10 +304,14 @@ const sendWelcomeDirectMessage = member => member.send('hi')
 const findScrimbaUserByDiscordId = async (discordId) => {
   try {
     const { rows }  = await pool
-      .query(`SELECT * 
-            FROM USERS 
-            WHERE discord_id = '${discordId}'`)
+      .query(`SELECT 
+              u.id, 
+              s.active
+            FROM USERS AS u
+            LEFT JOIN subscriptions AS s ON u.id = s.uid AND s.active = true
+            WHERE u.discord_id = '${discordId}'`)
     const user = rows[0]
+    console.log('user', user)
     return user
   } catch (error) {
     console.error(error)
@@ -322,6 +326,10 @@ const fetchScrimbaUser = async (discordId, channel) => {
     const interval = setInterval(async () => {
       const user = await findScrimbaUserByDiscordId(discordId)
       if (user) {
+        if (user.subscription.active === 'true') {
+          // todo assign badge
+          console.log('user is a pro member - give em a badge')
+        }
         await enableInput(channel, discordId)
         resolve()
         clearInterval(interval)
