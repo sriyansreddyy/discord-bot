@@ -297,7 +297,13 @@ bot.on('messageReactionAdd', async (messageReaction, user) => {
   }
 })
 
-const assignRegularMemberRole = member =>  member.roles.add(REGULAR_MEMBER_ROLE_ID)
+const assignRegularMemberRole = async member =>  {
+  try {
+    await member.roles.add(REGULAR_MEMBER_ROLE_ID)
+  } catch (error) {
+    console.error("error", error)
+  }
+}
 
 const sendWelcomeDirectMessage = member => member.send('hi')
 
