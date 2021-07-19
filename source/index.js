@@ -301,7 +301,8 @@ const assignRegularMemberRole = async member =>  {
   try {
     await member.roles.add(REGULAR_MEMBER_ROLE_ID)
   } catch (error) {
-    console.error("error", error)
+    console.error("error assignRegularMemberRole", error)
+    console.log("Are you sure the bot's role is higher than REGULAR_MEMBER_ROLE_ID in the role list?")
   }
 }
 
