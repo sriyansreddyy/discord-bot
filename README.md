@@ -8,8 +8,7 @@ This section outlines how to run the Scrimba Discord Onboarding bot locally for 
   - From the left-hand side menu, click **Bot** then **Add Bot**
   - For the newly-created bot, set the following options:
     - Toggle **Public bot** OFF
-    - Toggle **Presence intent** ON (needed for ?)
-    - Toggle **Server members intent** ON (needed for?)
+    - Toggle **Server members intent** ON (allows the bot to subscribe to member-related events like `guildMemberAdd`)
     - ℹ️ Remember to click **Save changes**
   - From the same left-hand side menu, click **OAuth2**. On this page, you will find an **OAuth2 URL Generator**. To generate an OAuth2 URL:
     - From the "Scopes" list, check **bot** 
