@@ -60,11 +60,11 @@ If something is the matter, message <@425243762151915523>; otherwise, please wri
 
 When you set your Discord profile picture, you will automatically proceed to the next step.`,
     process: async (answer, member, channel) => {
-      // await disableInput(channel, member.id)
+      await disableInput(channel, member.id)
       return new Promise(resolve => {
         const interval = setInterval(async () => {
           if (member.user.avatar) {
-            // await enableInput(channel, member.id)
+            await enableInput(channel, member.id)
             resolve()
             clearInterval(interval)
           }
@@ -75,8 +75,9 @@ When you set your Discord profile picture, you will automatically proceed to the
   },
   {
     shouldSkip: async member => {
-      console.log('shouldSkip?')
-      return await findScrimbaUserByDiscordId(member.user.id)
+      // console.log('shouldSkip?')
+      // return await findScrimbaUserByDiscordId(member.user.id)
+      return true
     },
     question: `Fantastik 🎉🇳🇴!
 
@@ -141,16 +142,16 @@ bot.on('guildMemberAdd', async member => {
       parent: ONBOARDING_CATEGORY_ID,
       permissionOverwrites: [
         {
-          id: bot.user.id,
-          allow: ['VIEW_CHANNEL', 'ADD_REACTIONS']
-        },
-        {
           id: member.id,
           allow: ['VIEW_CHANNEL']
         },
         {
           id: EVERYONE_ROLE_ID,
           deny: ['VIEW_CHANNEL']
+        },
+        {
+          id: bot.user.id,
+          allow: ['VIEW_CHANNEL']
         }
       ]
     })
@@ -185,6 +186,10 @@ const disableInput = async (channel, memberId) => {
       id: memberId,
       allow: ['VIEW_CHANNEL'],
       deny: ['SEND_MESSAGES']
+    },
+    {
+      id: bot.user.id,
+      allow: ['VIEW_CHANNEL', 'MANAGE_CHANNELS', 'ADD_REACTIONS']
     }
   ])
 }
@@ -198,6 +203,10 @@ const enableInput = async (channel, memberId) => {
     {
       id: memberId,
       allow: ['VIEW_CHANNEL']
+    },
+    {
+      id: bot.user.id,
+      allow: ['VIEW_CHANNEL', 'MANAGE_CHANNELS', 'ADD_REACTIONS']
     }
   ])
 }
@@ -219,7 +228,7 @@ const sendNextStep = async (
 
     const message = await channel.send(nextStep.question)
     if(nextStep.expectedReaction) {
-      // await disableInput(channel, member.id)
+      await disableInput(channel, member.id)
       await message.react(nextStep.expectedReaction)
     }
 
@@ -299,7 +308,7 @@ bot.on('messageReactionAdd', async (messageReaction, user) => {
       return
     }
 
-    // await enableInput(channel, user.id)
+    await enableInput(channel, user.id)
     const member = getOnboardeeFromChannel(channel)
     await processAnswer(step, index, channel, member, answer)
   }
@@ -336,7 +345,7 @@ const findScrimbaUserByDiscordId = async (discordId) => {
 
 const fetchScrimbaUser = async (discordId, channel) => {
   console.log('fetchScrimbaUser')
-  // await disableInput(channel, discordId)
+  await disableInput(channel, discordId)
   return new Promise(resolve => {
     const interval = setInterval(async () => {
       const user = await findScrimbaUserByDiscordId(discordId)
@@ -345,7 +354,7 @@ const fetchScrimbaUser = async (discordId, channel) => {
           // todo assign badge
           console.log('user is a pro member - give em a badge')
         }
-        // await enableInput(channel, discordId)
+        await enableInput(channel, discordId)
         resolve()
         clearInterval(interval)
       }
