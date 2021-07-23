@@ -350,7 +350,7 @@ const fetchScrimbaUser = async (discordId, channel) => {
     const interval = setInterval(async () => {
       const user = await findScrimbaUserByDiscordId(discordId)
       if (user) {
-        if (user.subscription.active === 'true') {
+        if (user.active === 'true') {
           // todo assign badge
           console.log('user is a pro member - give em a badge')
         }
