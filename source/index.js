@@ -76,8 +76,8 @@ When you set your Discord profile picture, you will automatically proceed to the
   {
     shouldSkip: async member => {
       // console.log('shouldSkip?')
-      // return await findScrimbaUserByDiscordId(member.user.id)
-      return true
+      return await findScrimbaUserByDiscordId(member.user.id)
+      // return true
     },
     question: `Fantastik 🎉🇳🇴!
 
