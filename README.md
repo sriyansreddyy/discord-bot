@@ -14,7 +14,7 @@ This section outlines how to run the Scrimba Discord Onboarding bot locally for 
     - From the "Scopes" list, check **bot** 
     - From the "Bot permissions" list, check the following permissions:
       - **Manage Roles** (allows bot to `overwritePermissions` and assign roles )
-      - **Manage Channels**
+      - **Manage Channels** (allows bot to create and delete channels)
       - **Kick Members**
       - **Manage Nicknames** (allows bot to set onboardee nickname)
       - **View Channels**
