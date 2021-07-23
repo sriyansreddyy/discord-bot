@@ -3,14 +3,10 @@ require('dotenv').config()
 const { Client, Permissions } = require('discord.js')
 const { Pool } = require('pg')
 
-const bot = new Client({ 
-  partials: ['MESSAGE', 'REACTION']
-})
-
+const INTERVAL = 5000
 const MILLISECONDS_BEFORE_OFFERING_HELP = 30000
 const MILLISECONDS_BEFORE_KICK_WARNING = 60000
 const MILLISECONDS_BEFORE_KICKING = 80000
-
 const WELCOME_PREFIX = '👋welcome-'
 const { 
   ONBOARDING_CATEGORY_ID,
@@ -19,6 +15,10 @@ const {
   DISCORD_BOT_TOKEN,
   PG_URI 
 } = process.env
+
+const bot = new Client({ 
+  partials: ['MESSAGE', 'REACTION']
+})
 
 const pool = new Pool({
   connectionString: PG_URI
@@ -401,7 +401,6 @@ If you're still on this step in ${MILLISECONDS_BEFORE_KICKING - MILLISECONDS_BEF
   }
 }
 
-const INTERVAL = 5000
 const startBeingHelpful = () => {
   setInterval(() => {
     bot
