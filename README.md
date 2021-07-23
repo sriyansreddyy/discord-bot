@@ -21,7 +21,8 @@ This section outlines how to run the Scrimba Discord Onboarding bot locally for 
     - As you check these options, the OAuth2 URL will dynamically generate. **Copy** the generated OAuth2 URL and navigate there. When promoted to "Add to server", choose the server you wish to add the bot to (for example, "Test Server"). Click **Continue** then **Authorize**
 - Step two, configure your local environment variables
   - Before going further, enable [Developer Mode in Discord](https://discord.com/developers/docs/game-sdk/store#:~:text=Open%20up%20the%20Discord%20app,and%20enter%20your%20application%20ID) to expose an otherwise hidden (and super handy) "Copy ID" context menu item
-  - Create a role to be assigned to members who complete the onboarding (for example, "Onboarded member"). Once you have created the role (and enabled developer mode), right click the role and click **Copy ID**
+  - If you have not already, create a role to be assigned to members who complete the onboarding (for example, "Onboarded member"). Once you have created the role (and enabled developer mode), right click the role and click **Copy ID**
+  - Now you've created a role eto be assigned to members who complete the onboarding, make sure the bot's role is higher up in the list (by dragging it) - the bot cannot assign roles higher in the list than it's own
   - Using the same context menu item, copy the "@everyone" role ID
   - Create a [channel category](https://support.discord.com/hc/en-us/articles/115001580171-Channel-Categories-101), under which new onboarding channels will be created by the bot (for example, "Onboarding channels"). Using the same context menu item, copy the channel category ID
   - Head to the [Discord Developer Portal](https://discord.com/developers/applications) and find the bot you created in step one. **Copy** the token
