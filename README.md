@@ -13,7 +13,7 @@ This section outlines how to run the Scrimba Discord Onboarding bot locally for 
   - From the same left-hand side menu, click **OAuth2**. On this page, you will find an **OAuth2 URL Generator**. To generate an OAuth2 URL:
     - From the "Scopes" list, check **bot** 
     - From the "Bot permissions" list, check the following permissions:
-      - **Manage Roles**
+      - **Manage Roles** (allows bot to `overwritePermissions`)
       - **Manage Channels**
       - **Kick Members**
       - **Manage Nicknames** (allows bot to set onboardee nickname)
