@@ -15,7 +15,7 @@ This section outlines how to run the Scrimba Discord Onboarding bot locally for 
     - From the "Bot permissions" list, check the following permissions:
       - **Manage Roles** (allows bot to `overwritePermissions` and assign roles )
       - **Manage Channels** (allows bot to create and delete channels)
-      - **Kick Members**
+      - **Kick Members** (allows bot to kick members if inactive)
       - **Manage Nicknames** (allows bot to set onboardee nickname)
     - As you check these options, the OAuth2 URL will dynamically generate. **Copy** the generated OAuth2 URL and navigate there. 
     - When promoted to "Add to server", choose the server you wish to add the bot to (for example, "Test Server"). Click **Continue** then **Authorize**
