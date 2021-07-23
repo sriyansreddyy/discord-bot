@@ -319,7 +319,7 @@ const assignRegularMemberRole = async member =>  {
     await member.roles.add(REGULAR_MEMBER_ROLE_ID)
   } catch (error) {
     console.error("error assignRegularMemberRole", error)
-    console.log("Are you sure the bot's role is higher than REGULAR_MEMBER_ROLE_ID in the role list?")
+    console.log("This normally happens because the bot is missing Manage Roles bot permission (granted when adding the bot with OAuth). Also happens if the bot's role is lower than REGULAR_MEMBER_ROLE_ID in roles list.")
   }
 }
 
