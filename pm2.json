@@ -1,0 +1,19 @@
+{
+	"apps": [{
+		"name": "discord-bot",
+		"wait_ready": true,
+		"log_date_format": "DD-MM-YYYY HH:mm:ss.SSS",
+		"script": "./source/index.js",
+		"time": true,
+		"env": {
+			"NODE_ENV": "production"
+		},
+		"env_development": {
+			"NODE_ENV": "development",
+			"watch": ["./source"],
+			"DEBUG_HIDE_DATE": true,
+			"DEBUG_COLORS": true,
+			"DEBUG_DEPTH": 2
+		}
+	}]
+}

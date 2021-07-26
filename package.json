@@ -1,7 +1,8 @@
 {
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node source/index.js"
+    "start": "pm2 start pm2.json",
+    "dev": "pm2 start pm2.json --env development"
   },
   "dependencies": {
     "discord.js": "^12.5.3",
