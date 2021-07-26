@@ -1,0 +1,21 @@
+name: Update production discord bot
+on:
+  push:
+    branches:
+      - main
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    steps:
+    - name: Connect to the host and run commands
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.DISCORD_SSH_HOST }}
+        key: ${{ secrets.DISCORD_SSH_KEY }}
+        username: ${{ secrets.DISCORD_SSH_USERNAME }}
+        script: |
+          git -C ${{ secrets.DISCORD_DIR }} checkout .
+          git -C ${{ secrets.DISCORD_DIR }} pull origin main
+          cd ${{ secrets.DISCORD_DIR }} && npm install
+          /home/scrimba/.npm-packages/bin/pm2 reload discord-bot
