@@ -24,7 +24,8 @@ const pool = new Pool({
   connectionString: PG_URI
 })
 
-const extractOnboardeeIdFromChannelName = channelName => channelName.split('_')[1]
+const extractOnboardeeIdFromChannelName = channelName =>
+  channelName.match(/_([^_]+$)/)[1]
 
 const getOnboardeeFromChannel = channel => {
   const guild = bot.guilds.cache.first()
