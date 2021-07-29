@@ -5,8 +5,8 @@ const { Pool } = require('pg')
 
 const INTERVAL = 5000
 const MILLISECONDS_BEFORE_OFFERING_HELP = 30000
-const MILLISECONDS_BEFORE_KICK_WARNING = 60000
-const MILLISECONDS_BEFORE_KICKING = 80000
+const MILLISECONDS_BEFORE_KICK_WARNING = 180000
+const MILLISECONDS_BEFORE_KICKING = 300000
 const WELCOME_PREFIX = '👋welcome-'
 const { 
   ONBOARDING_CATEGORY_ID,
@@ -24,7 +24,8 @@ const pool = new Pool({
   connectionString: PG_URI
 })
 
-const extractOnboardeeIdFromChannelName = channelName => channelName.split('_')[1]
+const extractOnboardeeIdFromChannelName = channelName =>
+  channelName.match(/_([^_]+$)/)[1]
 
 const getOnboardeeFromChannel = channel => {
   const guild = bot.guilds.cache.first()
