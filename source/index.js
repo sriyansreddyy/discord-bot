@@ -98,7 +98,7 @@ To complete the onboarding and unlock the Scrimba Discord server in all it's glo
   }
 ]
 
-const foo = () => {
+const cleanup = () => {
   bot
     .channels
     .cache
@@ -108,7 +108,7 @@ const foo = () => {
       if (!member) {
         // they probably left the server
         console.log('member left between restart, deleting channel')
-        await cleanup(channel)
+        await cleanupChannel(channel)
         return
       }
       const { step, index } = await findCurrentStep(channel)
@@ -121,8 +121,17 @@ const foo = () => {
 
 bot.on('ready', async () => {
   console.log(`Logged in as ${bot.user.id}!`)
-  startBeingHelpful()
-  foo()
+
+  cleanup()
+
+  setInterval(() => {
+    bot
+      .channels
+      .cache
+      .filter(channel => channel.name?.startsWith(WELCOME_PREFIX))
+      .forEach(offerHelpOrKick)
+  }, INTERVAL)
+
 })
 
 bot.on('guildMemberRemove', async member => {
@@ -131,7 +140,7 @@ bot.on('guildMemberRemove', async member => {
     .cache
     .find(channel => channel.name?.startsWith(WELCOME_PREFIX) && extractOnboardeeIdFromChannelName(channel.name) === member.id)
   if (channel) {
-    await cleanup(channel)
+    await cleanupChannel(channel)
   }
 })
 
@@ -238,7 +247,7 @@ const sendNextStep = async (
     }
   } else {
     await assignRegularMemberRole(member)
-    await cleanup(channel)
+    await cleanupChannel(channel)
     await sendWelcomeDirectMessage(member)
   }
 }
@@ -363,10 +372,10 @@ const fetchScrimbaUser = async (discordId, channel) => {
   })
 }
 
-const cleanup = channel => channel.delete()
+const cleanupChannel = channel => channel.delete()
 bot.login(DISCORD_BOT_TOKEN)
 
-const beHelpful = async channel => {
+const offerHelpOrKick = async channel => {
   // might need to check if channel exists(might have been
   // deleted within a few seconds)
   const { step, botMessage } = await findCurrentStep(channel)
@@ -400,16 +409,6 @@ If you're still on this step in ${MILLISECONDS_BEFORE_KICKING - MILLISECONDS_BEF
       await channel.send(error)
     }  
   }
-}
-
-const startBeingHelpful = () => {
-  setInterval(() => {
-    bot
-      .channels
-      .cache
-      .filter(channel => channel.name?.startsWith(WELCOME_PREFIX))
-      .forEach(beHelpful)
-  }, INTERVAL)
 }
 
 const createError = (text, channel) => {
