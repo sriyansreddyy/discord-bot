@@ -27,9 +27,10 @@ const pool = new Pool({
 const extractOnboardeeIdFromChannelName = channelName =>
   channelName.match(/_([^_]+$)/)[1]
 
-const getOnboardeeFromChannel = channel => {
+const getOnboardeeFromChannel = async channel => {
   const guild = bot.guilds.cache.first()
   const onboardeeId = extractOnboardeeIdFromChannelName(channel.name)
+  await guild.members.fetch()
   const onboardee = guild
     .members
     .cache
@@ -109,15 +110,13 @@ const cleanup = () => {
     .cache
     .filter(channel => channel.name?.startsWith(WELCOME_PREFIX))
     .forEach(async channel => {
-      const member = getOnboardeeFromChannel(channel)
+      const member = await getOnboardeeFromChannel(channel)
       if (!member) {
         // they probably left the server
-        console.log('member left between restart, deleting channel')
         await cleanupChannel(channel)
         return
       }
       const { step, index } = await findCurrentStep(channel)
-      console.log("step", step)
       if(step.processImmediately) {
         await processAnswer(step, index, channel, member, '')
       }
@@ -186,7 +185,6 @@ const findCurrentStep = async channel => {
     .filter(message => !message.content.includes('❌'))
   const botMessage = botMessages.first()
   const question = botMessage.content
-  console.log("question", question)
   const index = steps.findIndex(step => step.question === question)
   const step = steps[index]
   return { step, index, botMessage}
@@ -318,7 +316,6 @@ bot.on('messageReactionAdd', async (messageReaction, user) => {
 
   if (reactor === onboardee) {
     const { step, index } = await findCurrentStep(channel)
-    console.log("step", step)
 
     if (step.expectedReaction && step.expectedReaction !== answer)  {
       await channel.send(createError(`you reacted with ${answer} but we were looking for ${step.expectedReaction}`, channel))
@@ -326,7 +323,7 @@ bot.on('messageReactionAdd', async (messageReaction, user) => {
     }
 
     await enableInput(channel, user.id)
-    const member = getOnboardeeFromChannel(channel)
+    const member = await getOnboardeeFromChannel(channel)
     await processAnswer(step, index, channel, member, answer)
   }
 })
@@ -395,7 +392,7 @@ const offerHelpOrKick = async channel => {
   console.log("milliseconds since question", millisecondsSinceQuestion)
 
   if (millisecondsSinceQuestion >= MILLISECONDS_BEFORE_KICKING) {
-    const member = getOnboardeeFromChannel(channel)
+    const member = await getOnboardeeFromChannel(channel)
     await member.kick()
     return
   }
