@@ -348,7 +348,17 @@ const assignRegularMemberRole = async member =>  {
   }
 }
 
-const sendWelcomeDirectMessage = member => member.send('hi')
+const sendWelcomeDirectMessage = member => member.send(`Welcome to the Scrimba Discord community 👋 
+
+Joining a new Discord server can feel overwhelming, so we've gathered the most important information for you here.
+
+**Step 1: Check out the most important channels**
+In our community, you should first #👋introduce-yourself. Then, feel free to ask for #💼career-advice, and please #💻share-your-code if you have written something you're proud of. Finally, we also have a whole section dedicated to giving and getting coding help (more info below). You can also head over to one of our help channels if you're stuck, like #css-help, #javascript-help, or #react-help.
+
+**Step 2: Remember to be nice**
+We aim to be the friendliest space for developers to hang out. This means that there's no room for negativity, harsh criticism or bullying. If you misbehave, you will be given a warning and a 24 hour ban. If you misbehave once more, we'll need to ban you permanently.
+
+We're excited to have you here! `) 
 
 const findScrimbaUserByDiscordId = async (discordId) => {
   try {
