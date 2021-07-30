@@ -91,14 +91,14 @@ I will automatically detect when you click **Authorize** then send you the next 
 
 If you don't have a Scrimba account yet, create a free account here: https://scrimba.com. If you clicked **Authorize** and nothing happened, message my creator, <@425243762151915523>.`,
     process: (answer, member, channel) => fetchScrimbaUser(member.id, channel),
-    processImmediately: true,
+    processImmediately: true
   },
   {
     question: `You're almost there! 
 
 To complete the onboarding, watch this video we made to welcome you, then click the ✅ emoj beneath.
 
-   https://youtu.be/lPIi430q5fk. `,
+   https://youtu.be/lPIi430q5fk`,
     expectedReaction: '✅'
   }
 ]
@@ -186,6 +186,7 @@ const findCurrentStep = async channel => {
     .filter(message => !message.content.includes('❌'))
   const botMessage = botMessages.first()
   const question = botMessage.content
+  console.log("question", question)
   const index = steps.findIndex(step => step.question === question)
   const step = steps[index]
   return { step, index, botMessage}
@@ -317,6 +318,7 @@ bot.on('messageReactionAdd', async (messageReaction, user) => {
 
   if (reactor === onboardee) {
     const { step, index } = await findCurrentStep(channel)
+    console.log("step", step)
 
     if (step.expectedReaction && step.expectedReaction !== answer)  {
       await channel.send(createError(`you reacted with ${answer} but we were looking for ${step.expectedReaction}`, channel))
