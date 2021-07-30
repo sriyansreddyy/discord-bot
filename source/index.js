@@ -5,8 +5,8 @@ const { Pool } = require('pg')
 
 const INTERVAL = 5000
 const MILLISECONDS_BEFORE_OFFERING_HELP = 30000
-const MILLISECONDS_BEFORE_KICK_WARNING = 180000
-const MILLISECONDS_BEFORE_KICKING = 300000
+const MILLISECONDS_BEFORE_KICK_WARNING = 360000
+const MILLISECONDS_BEFORE_KICKING = 540000
 const WELCOME_PREFIX = '👋welcome-'
 const { 
   ONBOARDING_CATEGORY_ID,
@@ -44,7 +44,7 @@ const steps = [
 Right now, you can only see a couple of channels 😢. There are *a lot* more channels to see! To unlock them all, please take a moment to complete the onboarding.
 
 To get this party started, **what is your first name?**`,
-    help: `it's been a few minutes, and I still don't know your name 👉🥺👈.
+    help: `it's been a minute, and I still don't know your name 👉🥺👈.
 
 Write your name (for example, "Michael") below and press ENTER to continue. 
 
@@ -399,9 +399,11 @@ const offerHelpOrKick = async channel => {
   }
 
   if (millisecondsSinceQuestion >= MILLISECONDS_BEFORE_KICK_WARNING) {
-    const error = createError(`you've been on this step for quite some time (${MILLISECONDS_BEFORE_KICK_WARNING} milliseconds).
+    const error = createError(`you've been on this step for a few minutes.
 
-If you're still on this step in ${MILLISECONDS_BEFORE_KICKING - MILLISECONDS_BEFORE_KICK_WARNING} milliseconds, I will remove you from the server. Don't worry! You can always join again and attempt the onboarding.`, channel)
+Remember, you can always message <@425243762151915523> from Scrimba if you're having trouble!
+
+If, in a few minutes, you're still on this step, I will softly remove you from the server and delete this channel.  Don't worry! You can always join again and attempt the onboarding.`, channel)
     if (!messagesSinceQuestion.some(message => message.content === error)) {
       await channel.send(error)
     }  
