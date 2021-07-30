@@ -204,7 +204,7 @@ const disableInput = async (channel, memberId) => {
     },
     {
       id: bot.user.id,
-      allow: ['VIEW_CHANNEL', 'MANAGE_CHANNELS', 'ADD_REACTIONS']
+      allow: ['VIEW_CHANNEL']
     }
   ])
 }
@@ -221,7 +221,7 @@ const enableInput = async (channel, memberId) => {
     },
     {
       id: bot.user.id,
-      allow: ['VIEW_CHANNEL', 'MANAGE_CHANNELS', 'ADD_REACTIONS']
+      allow: ['VIEW_CHANNEL']
     }
   ])
 }
