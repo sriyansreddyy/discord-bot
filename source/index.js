@@ -65,6 +65,7 @@ I will automatically detect when you've set a profile picture then send you the 
     help: "**Please take a moment to set a Discord profile piture**. Not sure how? Check out this article, https://www.businessinsider.com/how-to-change-discord-picture?r=US&IR=T",
     shouldSkip: member => member.user.avatar,
     process: async (answer, member, channel) => {
+      console.log("got avatar, channel", channel)
       await disableInput(channel, member.id)
       return new Promise(resolve => {
         const interval = setInterval(async () => {
@@ -92,7 +93,7 @@ I will automatically detect when you click **Authorize** then send you the next 
     help: `**Please take a moment to connect your Scrimba and Discord account**.
 
 If you don't have a Scrimba account yet, create a free account here: https://scrimba.com. If you clicked **Authorize** and nothing happened, message my creator, <@425243762151915523>.`,
-    process: (answer, member, channel) => fetchScrimbaUser(member.id, channel),
+    process: (answer, member, channel) => processConnectAccountsStep(member.id, channel),
     processImmediately: true
   },
   {
@@ -367,18 +368,21 @@ const findScrimbaUserByDiscordId = async (discordId) => {
   }
 }
 
-const fetchScrimbaUser = async (discordId, channel) => {
-  console.log('fetchScrimbaUser')
+const processConnectAccountsStep = async (discordId, channel) => {
+  console.log('processConnectAccountsStep')
   await disableInput(channel, discordId)
   return new Promise(resolve => {
     const interval = setInterval(async () => {
+      console.log(`trying to find ${discordId}`)
       const user = await findScrimbaUserByDiscordId(discordId)
+      console.log(`found user,`, user)
       if (user) {
         if (user.active === 'true') {
           // todo assign badge
-          console.log('user is a pro member - give em a badge')
+          console.log(`user is a pro member - give them a badge`)
         }
         await enableInput(channel, discordId)
+        console.log('resolving processConnectAccountsStep promise')
         resolve()
         clearInterval(interval)
       }

@@ -3,7 +3,7 @@
 //
 require('dotenv').config()
 
-const DISCORD_ID = '584258569759883298'
+const DISCORD_ID = '812310101426831361'
 
 const { PG_URI } = process.env
 
@@ -12,7 +12,6 @@ const { Pool } = require('pg')
 const pool = new Pool({
   connectionString: PG_URI
 })
-
 
 const test = async () => {
   const connectionPool = await pool.connect()
