@@ -27,9 +27,10 @@ const pool = new Pool({
 const extractOnboardeeIdFromChannelName = channelName =>
   channelName.match(/_([^_]+$)/)[1]
 
-const getOnboardeeFromChannel = channel => {
+const getOnboardeeFromChannel = async channel => {
   const guild = bot.guilds.cache.first()
   const onboardeeId = extractOnboardeeIdFromChannelName(channel.name)
+  await guild.members.fetch()
   const onboardee = guild
     .members
     .cache
@@ -104,13 +105,13 @@ To complete the onboarding, watch this video we made to welcome you, then click 
   }
 ]
 
-const cleanup = () => {
+const cleanup = async () => {
   bot
     .channels
     .cache
     .filter(channel => channel.name?.startsWith(WELCOME_PREFIX))
     .forEach(async channel => {
-      const member = getOnboardeeFromChannel(channel)
+      const member = await getOnboardeeFromChannel(channel)
       if (!member) {
         // they probably left the server
         console.log('member left between restart, deleting channel')
@@ -128,7 +129,7 @@ const cleanup = () => {
 bot.on('ready', async () => {
   console.log(`Logged in as ${bot.user.id}!`)
 
-  cleanup()
+  await cleanup()
 
   setInterval(() => {
     bot
@@ -334,7 +335,7 @@ bot.on('messageReactionAdd', async (messageReaction, user) => {
     }
 
     await enableInput(channel, user.id)
-    const member = getOnboardeeFromChannel(channel)
+    const member = await getOnboardeeFromChannel(channel)
     await processAnswer(step, index, channel, member, answer)
   }
 })
@@ -403,7 +404,7 @@ const offerHelpOrKick = async channel => {
   console.log("milliseconds since question", millisecondsSinceQuestion)
 
   if (millisecondsSinceQuestion >= MILLISECONDS_BEFORE_KICKING) {
-    const member = getOnboardeeFromChannel(channel)
+    const member = await getOnboardeeFromChannel(channel)
     await member.kick()
     return
   }
