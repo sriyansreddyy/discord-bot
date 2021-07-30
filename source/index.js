@@ -96,7 +96,7 @@ If you don't have a Scrimba account yet, create a free account here: https://scr
   {
     question: `You're almost there! 
 
-To complete the onboarding, watch this video we made to welcome you, then click the ✅ emoj beneath.
+To complete the onboarding, watch this video we made to welcome you, then click the ✅ emoji beneath.
 
    https://youtu.be/lPIi430q5fk. `,
     expectedReaction: '✅'
