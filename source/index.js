@@ -39,14 +39,16 @@ const getOnboardeeFromChannel = channel => {
 
 const steps = [
   {
-    question: `Welcome to the Scrimba Discord 👋! This is a coding community for Scrimba users and aspiring web developers. 
+    question: `Welcome to the Scrimba Discord 👋! 
 
-Right now, you can only see a couple of channels 😢. There are *a lot* more channels to see! You'll unlock access in just a moment but first, please complete the onboarding.
+Right now, you can only see a couple of channels 😢. There are *a lot* more channels to see! To unlock them all, please take a moment to complete the onboarding.
 
 To get this party started, **what is your first name?**`,
-    help: `it's been a few minutes and I still don't know your name 👉🥺👈.
+    help: `it's been a few minutes, and I still don't know your name 👉🥺👈.
 
-If something is the matter, message <@425243762151915523>; otherwise, please write your name below and press ENTER to continue.`,
+Write your name (for example, "Michael") below and press ENTER to continue. 
+
+If something isn't working, message <@425243762151915523>.`,
     validate: answer => {
       if (answer.includes(' ')) {
         return `you wrote "${answer}" but that answer includes a space. What is your *first* name, please?`
@@ -55,11 +57,11 @@ If something is the matter, message <@425243762151915523>; otherwise, please wri
     process: async (answer, member) => await member.setNickname(answer)
   }, 
   {
-    help: "**Please take a moment to set a Discord profile piture**. Not sure how? Check out this article, https://www.businessinsider.com/how-to-change-discord-picture?r=US&IR=T",
-    shouldSkip: member => member.user.avatar,
     question: `Hold up a second ✋ Please take a moment to set a Discord profile picture - it makes the communication feel more personal.  https://i.imgur.com/MiS7VB5.png
 
-When you set your Discord profile picture, you will automatically proceed to the next step.`,
+I will automatically detect when you've set a profile picture then send you the next step.`,
+    help: "**Please take a moment to set a Discord profile piture**. Not sure how? Check out this article, https://www.businessinsider.com/how-to-change-discord-picture?r=US&IR=T",
+    shouldSkip: member => member.user.avatar,
     process: async (answer, member, channel) => {
       await disableInput(channel, member.id)
       return new Promise(resolve => {
@@ -84,16 +86,19 @@ When you set your Discord profile picture, you will automatically proceed to the
 
 Next, please take a moment to connect your Scrimba and Discord accounts: https://scrimba.com/discord/connect
 
-When you click **Authorize**, you will automatically proceed to the next step.`,
+I will automatically detect when you click **Authorize** then send you the next (final!) step.`,
+    help: `**Please take a moment to connect your Scrimba and Discord account**.
+
+If you don't have a Scrimba account yet, create a free account here: https://scrimba.com. If you clicked **Authorize** and nothing happened, message my creator, <@425243762151915523>.`,
     process: (answer, member, channel) => fetchScrimbaUser(member.id, channel),
     processImmediately: true,
   },
   {
-    question: `Are as good at centring CSS elements as you are onboarding 🤩? Nicely done 👍!
+    question: `You're almost there! 
 
-We made a video to welcome you to the community and tell you about our community values: https://youtu.be/lPIi430q5fk
+To complete the onboarding, watch this video we made to welcome you, then click the ✅ emoj beneath.
 
-To complete the onboarding and unlock the Scrimba Discord server in all it's glory, **react to this message with the ✅ emoji if you agree to uphold our community values**.`,
+   https://youtu.be/lPIi430q5fk. `,
     expectedReaction: '✅'
   }
 ]
@@ -396,7 +401,7 @@ const offerHelpOrKick = async channel => {
   if (millisecondsSinceQuestion >= MILLISECONDS_BEFORE_KICK_WARNING) {
     const error = createError(`you've been on this step for quite some time (${MILLISECONDS_BEFORE_KICK_WARNING} milliseconds).
 
-If you're still on this step in ${MILLISECONDS_BEFORE_KICKING - MILLISECONDS_BEFORE_KICK_WARNING} milliseconds, I will remove you from the server. Don't worry! You an always join again and attempt the onboarding.`, channel)
+If you're still on this step in ${MILLISECONDS_BEFORE_KICKING - MILLISECONDS_BEFORE_KICK_WARNING} milliseconds, I will remove you from the server. Don't worry! You can always join again and attempt the onboarding.`, channel)
     if (!messagesSinceQuestion.some(message => message.content === error)) {
       await channel.send(error)
     }  
