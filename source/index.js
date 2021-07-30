@@ -119,7 +119,6 @@ const cleanup = async () => {
         return
       }
       const { step, index } = await findCurrentStep(channel)
-      console.log("step", step)
       if(step.processImmediately) {
         await processAnswer(step, index, channel, member, '')
       }
