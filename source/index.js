@@ -1,12 +1,12 @@
 require('dotenv').config()
 
-const { Client } = require('discord.js')
+const { Client, Permissions } = require('discord.js')
 const { Pool } = require('pg')
 
 const INTERVAL = 5000
 const MILLISECONDS_BEFORE_OFFERING_HELP = 30000
-const MILLISECONDS_BEFORE_KICK_WARNING = 180000
-const MILLISECONDS_BEFORE_KICKING = 300000
+const MILLISECONDS_BEFORE_KICK_WARNING = 360000
+const MILLISECONDS_BEFORE_KICKING = 540000
 const WELCOME_PREFIX = '👋welcome-'
 const { 
   ONBOARDING_CATEGORY_ID,
@@ -27,10 +27,9 @@ const pool = new Pool({
 const extractOnboardeeIdFromChannelName = channelName =>
   channelName.match(/_([^_]+$)/)[1]
 
-const getOnboardeeFromChannel = async channel => {
+const getOnboardeeFromChannel = channel => {
   const guild = bot.guilds.cache.first()
   const onboardeeId = extractOnboardeeIdFromChannelName(channel.name)
-  await guild.members.fetch()
   const onboardee = guild
     .members
     .cache
@@ -45,7 +44,7 @@ const steps = [
 Right now, you can only see a couple of channels 😢. There are *a lot* more channels to see! To unlock them all, please take a moment to complete the onboarding.
 
 To get this party started, **what is your first name?**`,
-    help: `it's been a few minutes, and I still don't know your name 👉🥺👈.
+    help: `it's been a minute, and I still don't know your name 👉🥺👈.
 
 Write your name (for example, "Michael") below and press ENTER to continue. 
 
@@ -58,14 +57,12 @@ If something isn't working, message <@425243762151915523>.`,
     process: async (answer, member) => await member.setNickname(answer)
   }, 
   {
-    question: `Hold up a second ✋ Please take a moment to set a Discord profile picture - it makes the communication feel more personal.
+    question: `Hold up a second ✋ Please take a moment to set a Discord profile picture - it makes the communication feel more personal.  https://i.imgur.com/MiS7VB5.png
 
 I will automatically detect when you've set a profile picture then send you the next step.`,
-    attachment: './source/avatar_example.png',
     help: "**Please take a moment to set a Discord profile piture**. Not sure how? Check out this article, https://www.businessinsider.com/how-to-change-discord-picture?r=US&IR=T",
     shouldSkip: member => member.user.avatar,
     process: async (answer, member, channel) => {
-      console.log("got avatar, channel", channel)
       await disableInput(channel, member.id)
       return new Promise(resolve => {
         const interval = setInterval(async () => {
@@ -93,15 +90,15 @@ I will automatically detect when you click **Authorize** then send you the next 
     help: `**Please take a moment to connect your Scrimba and Discord account**.
 
 If you don't have a Scrimba account yet, create a free account here: https://scrimba.com. If you clicked **Authorize** and nothing happened, message my creator, <@425243762151915523>.`,
-    process: (answer, member, channel) => processConnectAccountsStep(member.id, channel),
-    processImmediately: true
+    process: (answer, member, channel) => fetchScrimbaUser(member.id, channel),
+    processImmediately: true,
   },
   {
     question: `You're almost there! 
 
-To complete the onboarding, watch this video we made to welcome you, then click the ✅ emoj beneath.
+To complete the onboarding, watch this video we made to welcome you, then click the ✅ emoji beneath.
 
-   https://youtu.be/lPIi430q5fk`,
+   https://youtu.be/lPIi430q5fk. `,
     expectedReaction: '✅'
   }
 ]
@@ -112,13 +109,15 @@ const cleanup = () => {
     .cache
     .filter(channel => channel.name?.startsWith(WELCOME_PREFIX))
     .forEach(async channel => {
-      const member = await getOnboardeeFromChannel(channel)
+      const member = getOnboardeeFromChannel(channel)
       if (!member) {
         // they probably left the server
+        console.log('member left between restart, deleting channel')
         await cleanupChannel(channel)
         return
       }
       const { step, index } = await findCurrentStep(channel)
+      console.log("step", step)
       if(step.processImmediately) {
         await processAnswer(step, index, channel, member, '')
       }
@@ -205,7 +204,7 @@ const disableInput = async (channel, memberId) => {
     },
     {
       id: bot.user.id,
-      allow: ['VIEW_CHANNEL']
+      allow: ['VIEW_CHANNEL', 'MANAGE_CHANNELS', 'ADD_REACTIONS']
     }
   ])
 }
@@ -222,7 +221,7 @@ const enableInput = async (channel, memberId) => {
     },
     {
       id: bot.user.id,
-      allow: ['VIEW_CHANNEL']
+      allow: ['VIEW_CHANNEL', 'MANAGE_CHANNELS', 'ADD_REACTIONS']
     }
   ])
 }
@@ -241,17 +240,8 @@ const sendNextStep = async (
       await sendNextStep(currentStepIndex, channel, member)
       return
     }
-    
-    let message
-    if(nextStep.attachment) {
-      message = await channel.send({ 
-        content: nextStep.question,
-        files: [nextStep.attachment]
-      })
-    } else {
-      message = await channel.send(nextStep.question)
-    }
 
+    const message = await channel.send(nextStep.question)
     if(nextStep.expectedReaction) {
       await disableInput(channel, member.id)
       await message.react(nextStep.expectedReaction)
@@ -334,7 +324,7 @@ bot.on('messageReactionAdd', async (messageReaction, user) => {
     }
 
     await enableInput(channel, user.id)
-    const member = await getOnboardeeFromChannel(channel)
+    const member = getOnboardeeFromChannel(channel)
     await processAnswer(step, index, channel, member, answer)
   }
 })
@@ -368,21 +358,18 @@ const findScrimbaUserByDiscordId = async (discordId) => {
   }
 }
 
-const processConnectAccountsStep = async (discordId, channel) => {
-  console.log('processConnectAccountsStep')
+const fetchScrimbaUser = async (discordId, channel) => {
+  console.log('fetchScrimbaUser')
   await disableInput(channel, discordId)
   return new Promise(resolve => {
     const interval = setInterval(async () => {
-      console.log(`trying to find ${discordId}`)
       const user = await findScrimbaUserByDiscordId(discordId)
-      console.log(`found user,`, user)
       if (user) {
         if (user.active === 'true') {
           // todo assign badge
-          console.log(`user is a pro member - give them a badge`)
+          console.log('user is a pro member - give em a badge')
         }
         await enableInput(channel, discordId)
-        console.log('resolving processConnectAccountsStep promise')
         resolve()
         clearInterval(interval)
       }
@@ -406,15 +393,17 @@ const offerHelpOrKick = async channel => {
   console.log("milliseconds since question", millisecondsSinceQuestion)
 
   if (millisecondsSinceQuestion >= MILLISECONDS_BEFORE_KICKING) {
-    const member = await getOnboardeeFromChannel(channel)
+    const member = getOnboardeeFromChannel(channel)
     await member.kick()
     return
   }
 
   if (millisecondsSinceQuestion >= MILLISECONDS_BEFORE_KICK_WARNING) {
-    const error = createError(`you've been on this step for quite some time (${MILLISECONDS_BEFORE_KICK_WARNING} milliseconds).
+    const error = createError(`you've been on this step for a few minutes.
 
-If you're still on this step in ${MILLISECONDS_BEFORE_KICKING - MILLISECONDS_BEFORE_KICK_WARNING} milliseconds, I will remove you from the server. Don't worry! You can always join again and attempt the onboarding.`, channel)
+Remember, you can always message <@425243762151915523> from Scrimba if you're having trouble!
+
+If, in a few minutes, you're still on this step, I will softly remove you from the server and delete this channel.  Don't worry! You can always join again and attempt the onboarding.`, channel)
     if (!messagesSinceQuestion.some(message => message.content === error)) {
       await channel.send(error)
     }  
