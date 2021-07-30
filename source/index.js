@@ -47,7 +47,7 @@ Right now, you can only see a couple of channels 😢. There are *a lot* more ch
 To get this party started, **what is your first name?**`,
     help: `it's been a minute, and I still don't know your name 👉🥺👈.
 
-Write your name (for example, "Michael") below and press ENTER to continue. 
+Write your first name below and press ENTER to continue. 
 
 If something isn't working, message <@425243762151915523>.`,
     validate: answer => {
