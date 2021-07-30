@@ -1,6 +1,6 @@
 require('dotenv').config()
 
-const { Client, MessageAttachment } = require('discord.js')
+const { Client } = require('discord.js')
 const { Pool } = require('pg')
 
 const INTERVAL = 5000
