@@ -57,9 +57,10 @@ If something isn't working, message <@425243762151915523>.`,
     process: async (answer, member) => await member.setNickname(answer)
   }, 
   {
-    question: `Hold up a second ✋ Please take a moment to set a Discord profile picture - it makes the communication feel more personal.  https://i.imgur.com/MiS7VB5.png
+    question: `Hold up a second ✋ Please take a moment to set a Discord profile picture - it makes the communication feel more personal.
 
 I will automatically detect when you've set a profile picture then send you the next step.`,
+    attachment: './source/avatar_example.png',
     help: "**Please take a moment to set a Discord profile piture**. Not sure how? Check out this article, https://www.businessinsider.com/how-to-change-discord-picture?r=US&IR=T",
     shouldSkip: member => member.user.avatar,
     process: async (answer, member, channel) => {
@@ -241,7 +242,16 @@ const sendNextStep = async (
       return
     }
 
-    const message = await channel.send(nextStep.question)
+    let message 
+    if (nextStep.attachment) {
+      message = await channel.send({
+        content: nextStep.question,
+        files: [nextStep.attachment]
+      })
+    } else {
+      message = await channel.send(nextStep.question)
+    }
+
     if(nextStep.expectedReaction) {
       await disableInput(channel, member.id)
       await message.react(nextStep.expectedReaction)
