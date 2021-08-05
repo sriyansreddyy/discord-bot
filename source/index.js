@@ -1,4 +1,3 @@
-//todo: remove emoji feedback
 //
 require('dotenv').config()
 
@@ -402,8 +401,7 @@ const fetchScrimbaUser = async (discordId, channel) => {
       const user = await findScrimbaUserByDiscordId(discordId)
       if (user) {
         if (user.active === true) {
-          await channel.send('ℹ️ Oh! You are a PRO member. I will add a special badge to your profile!')
-          // console.log('user is a pro member - give em a badge')
+          await channel.send("ℹ️ Oh! You are a PRO member. I will add a special badge to your profile! https://media.giphy.com/media/g9582DNuQppxC/giphy.gif",)
         }
         await enableInput(channel, discordId)
         resolve()
