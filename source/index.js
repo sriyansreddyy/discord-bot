@@ -334,7 +334,6 @@ bot.on('messageReactionAdd', async (messageReaction, user) => {
     const { step, index } = await findCurrentStep(channel)
 
     if (step.expectedReaction && step.expectedReaction !== answer)  {
-      await channel.send(createError(`you reacted with ${answer} but we were looking for ${step.expectedReaction}`, channel))
       return
     }
 
