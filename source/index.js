@@ -57,7 +57,8 @@ If something isn't working, message <@425243762151915523>.`,
         return `you wrote "${answer}" but that answer includes a space. What is your *first* name, please?`
       }
     },
-    process: async (answer, member) => await member.setNickname(answer)
+    process: async (answer, member) => await member.setNickname(answer),
+    successMessage: "ℹ️  Fantastic, I changed your nickname!"
   }, 
   {
     question: `Hold up a second ✋ Please take a moment to set a Discord profile picture - it makes the communication feel more personal.
@@ -283,6 +284,9 @@ const processAnswer = async (
     return
   }
   await currentStep.process?.(answer, member, channel)
+  if (currentStep.successMessage) {
+    await channel.send(currentStep.successMessage)
+  }
   await sendNextStep(currentStepIndex, channel, member)
 }
 
