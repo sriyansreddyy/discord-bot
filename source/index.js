@@ -1,3 +1,5 @@
+//todo: remove emoji feedback
+//
 require('dotenv').config()
 
 const { Client, Permissions } = require('discord.js')
@@ -13,6 +15,7 @@ const {
   EVERYONE_ROLE_ID,
   REGULAR_MEMBER_ROLE_ID,
   DISCORD_BOT_TOKEN,
+  PRO_ROLE_ID,
   PG_URI 
 } = process.env
 
@@ -185,6 +188,7 @@ const findCurrentStep = async channel => {
   const botMessages = messages
     .filter(message => message.author.id === bot.user.id)
     .filter(message => !message.content.includes('❌'))
+    .filter(message => !message.content.includes('ℹ️'))
   const botMessage = botMessages.first()
   const question = botMessage.content
   const index = steps.findIndex(step => step.question === question)
@@ -261,6 +265,7 @@ const sendNextStep = async (
       await processAnswer(nextStep, currentStepIndex, channel, member, '')
     }
   } else {
+    await assignProMemberRole(member)
     await assignRegularMemberRole(member)
     await cleanupChannel(channel)
     await sendWelcomeDirectMessage(member)
@@ -339,6 +344,19 @@ bot.on('messageReactionAdd', async (messageReaction, user) => {
   }
 })
 
+const assignProMemberRole = async member =>  {
+  try {
+    const user = await findScrimbaUserByDiscordId(member.id)
+    if (user) {
+      if (user.active === true) {
+        await member.roles.add(PRO_ROLE_ID)
+      }
+    }
+  } catch (error) {
+    console.error("error assignProMemberRole", error)
+  }
+}
+
 const assignRegularMemberRole = async member =>  {
   try {
     await member.roles.add(REGULAR_MEMBER_ROLE_ID)
@@ -370,7 +388,6 @@ const findScrimbaUserByDiscordId = async (discordId) => {
             LEFT JOIN subscriptions AS s ON u.id = s.uid AND s.active = true
             WHERE u.discord_id = '${discordId}'`)
     const user = rows[0]
-    console.log('user', user)
     return user
   } catch (error) {
     console.error(error)
@@ -385,9 +402,9 @@ const fetchScrimbaUser = async (discordId, channel) => {
     const interval = setInterval(async () => {
       const user = await findScrimbaUserByDiscordId(discordId)
       if (user) {
-        if (user.active === 'true') {
-          // todo assign badge
-          console.log('user is a pro member - give em a badge')
+        if (user.active === true) {
+          await channel.send('ℹ️ Oh! You are a PRO member. I will add a special badge to your profile!')
+          // console.log('user is a pro member - give em a badge')
         }
         await enableInput(channel, discordId)
         resolve()
