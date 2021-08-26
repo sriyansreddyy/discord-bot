@@ -349,6 +349,7 @@ bot.on('messageReactionAdd', async (messageReaction, user) => {
 const assignProMemberRole = async member =>  {
   try {
     const user = await findScrimbaUserByDiscordId(member.id)
+    console.log("user", user)
     if (user) {
       if (user.active === true) {
         await member.roles.add(PRO_ROLE_ID)
@@ -385,6 +386,7 @@ const findScrimbaUserByDiscordId = async (discordId) => {
     const { rows }  = await pool
       .query(`SELECT 
               u.id, 
+              u.email,
               s.active
             FROM USERS AS u
             LEFT JOIN subscriptions AS s ON u.id = s.uid AND s.active = true
