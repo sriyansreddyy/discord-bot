@@ -14,6 +14,7 @@ const {
   ONBOARDING_CATEGORY_ID,
   EVERYONE_ROLE_ID,
   REGULAR_MEMBER_ROLE_ID,
+  UNLOCKED_INTRODUCTIONS_CHANNEL_ROLE_ID,
   DISCORD_BOT_TOKEN,
   PRO_ROLE_ID,
   PG_URI,
@@ -109,6 +110,15 @@ If you don't have a Scrimba account yet, create a free account here: https://scr
 To complete the onboarding, watch this video we made to welcome you, then click the ✅ emoji beneath.
 
    https://youtu.be/lPIi430q5fk`,
+    expectedReaction: '✅'
+  },
+  {
+    question: `Go to the introduce-yourself channel and say hello`,
+    shouldSkip: async member => { 
+      // using shouldSkip like a preProcessor hook lol
+      await member.roles.add(UNLOCKED_INTRODUCTIONS_CHANNEL_ROLE_ID)
+      return false
+    },
     expectedReaction: '✅'
   }
 ]
