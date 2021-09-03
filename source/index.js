@@ -1,4 +1,3 @@
-//
 require('dotenv').config()
 
 const { Client, Permissions } = require('discord.js')
@@ -48,26 +47,30 @@ const getOnboardeeFromChannel = async channel => {
 
 const steps = [
   {
-    question: `Welcome to the Scrimba Discord 👋! 
+    question: `Meow 👋! Welcome to the Scrimba community! 
 
-Right now, you can only see a couple of channels 😢. There are *a lot* more channels to see! To unlock them all, please take a moment to complete the onboarding.
+I am Scrimba's mascot, Pumpkin, and I am here to lend you a helping paw.
 
-To get this party started, **what is your first name?**`,
+Right now, you can only see a couple of channels 😢. 
+
+There are *tonne* more, which I will unlock for you once you answer some questsions.
+
+First, **what is your first name?**`,
     help: `it's been a minute, and I still don't know your name 👉🥺👈.
 
-Write your first name below and press ENTER to continue. 
-
-If something isn't working, message <@425243762151915523>.`,
+Write your first name below and press ENTER to continue.`,
     validate: answer => {
       if (answer.includes(' ')) {
         return `you wrote "${answer}" but that answer includes a space. What is your *first* name, please?`
       }
     },
     process: async (answer, member) => await member.setNickname(answer),
-    successMessage: "ℹ️  Fantastic, I changed your nickname!"
+    successMessage: "ℹ️  Nice to meet youu"
   }, 
   {
-    question: `Hold up a second ✋ Please take a moment to set a Discord profile picture - it makes the communication feel more personal.
+    question: `I couldn't help but notice you don't have a profile picture. 
+
+Please take a moment to set a Discord profile picture - it makes the communication feel more personal.
 
 I will automatically detect when you've set a profile picture then send you the next step.`,
     attachment: './source/avatar_example.png',
@@ -93,27 +96,44 @@ I will automatically detect when you've set a profile picture then send you the 
       return await findScrimbaUserByDiscordId(member.user.id)
       // return true
     },
-    question: `Fantastik 🎉🇳🇴!
+    question: `Next, please take a moment to connect your Scrimba and Discord accounts: https://scrimba.com/discord/connect
 
-Next, please take a moment to connect your Scrimba and Discord accounts: https://scrimba.com/discord/connect
-
-I will automatically detect when you click **Authorize** then send you the next (final!) step.`,
+I will automatically detect when you click **Authorize** then send you the next step.`,
     help: `**Please take a moment to connect your Scrimba and Discord account**.
 
-If you don't have a Scrimba account yet, create a free account here: https://scrimba.com. If you clicked **Authorize** and nothing happened, message my creator, <@425243762151915523>.`,
+If you don't have a Scrimba account yet, create a free account here: https://scrimba.com. 
+
+If you clicked **Authorize** but nothing happened, please ensure you are not logged in to a different Discord account in your web browser.`,
+    successMessage: 'Fantastik! 🇳🎉',
     process: (answer, member, channel) => fetchScrimbaUser(member.id, channel),
     processImmediately: true,
   },
   {
-    question: `You're almost there! 
-
-To complete the onboarding, watch this video we made to welcome you, then click the ✅ emoji beneath.
+    question: `Please watch this welcome video then click the ✅ emoji beneath to move on to the final step.
 
    https://youtu.be/lPIi430q5fk`,
-    expectedReaction: '✅'
+    expectedReaction: '✅',
+    successMessage: 'ℹ️ Great!'
   },
   {
-    question: `Go to the introduce-yourself channel and say hello`,
+    question: `I just unlocked a channel called #introduce-yourself for you. Do you see it?
+
+We ask all new members to introduce themselves. You can read about other new members then please write your own introduction! 
+
+You can introduce yourself any way you like but here's a template to make it easy. Just replace the ... bits with your own information:
+
+\`\`\`
+Hello 👋
+        
+My name is ..., I am from ... and I just started the Frontend Developer Career Path 🔥
+        
+I am currently working/unemployed/studying at ...
+        
+When I am not coding, I enjoy ....
+        
+Looking forward to become a part of this epic/awesome/friendly community 🤩 🙏
+\`\`\`
+Once you've done that, come back here and click the ✅ emoji beneath to unlock the whole server.`,
     shouldSkip: async member => { 
       // using shouldSkip like a preProcessor hook lol
       await member.roles.add(UNLOCKED_INTRODUCTIONS_CHANNEL_ROLE_ID)
