@@ -120,12 +120,12 @@ If you clicked **Authorize** but nothing happened, please ensure you are not log
 
 We ask all new members to introduce themselves. You can read about other new members then please write your own introduction! 
 
-You can introduce yourself any way you like but here's a template to make it easy. Just replace the ... bits with your own information:
+You can introduce yourself any way you like but here's a template to make it easy. Just replace the \`...\` bits with your own information:
 
 \`\`\`
 Hello 👋
         
-My name is ..., I am from ... and I just started the Frontend Developer Career Path 🔥
+My name is ... and I am from ...!
         
 I am currently working/unemployed/studying at ...
         
