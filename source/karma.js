@@ -1,6 +1,6 @@
 const karma = bot => {
-  const NOTIFICATIONS_CHANNEL_ID = '868130359106207844'
-  // const NOTIFICATIONS_CHANNEL_ID = '888143560673747044' // prod
+  // const NOTIFICATIONS_CHANNEL_ID = '868130359106207844'
+  const NOTIFICATIONS_CHANNEL_ID = '888143560673747044' // prod
   bot.on('messageReactionAdd', async (messageReaction, user) => {
     if (messageReaction.partial) {
       await messageReaction.fetch()
