@@ -1,4 +1,5 @@
 require('dotenv').config()
+const karma = require ('./karma')
 
 const { Client, Permissions } = require('discord.js')
 const { Pool } = require('pg')
@@ -358,7 +359,7 @@ bot.on('messageReactionAdd', async (messageReaction, user) => {
     emoji : { name: answer }
   } = messageReaction
 
-  if (channel.type !== "text" && !channel.name.startsWith(WELCOME_PREFIX)) {
+  if (channel.type !== "text" || !channel.name.startsWith(WELCOME_PREFIX) ) {
     return
   }
   
@@ -547,3 +548,5 @@ const addTag = async member => {
     )
   }
 }
+
+karma(bot)
