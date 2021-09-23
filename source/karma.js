@@ -5,7 +5,6 @@ const karma = bot => {
       await messageReaction.fetch()
     }
     const { message, emoji } = messageReaction
-
     console.log(message)
     const notificationsChannel = await bot
       .channels
