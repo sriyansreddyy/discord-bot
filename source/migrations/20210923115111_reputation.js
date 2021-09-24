@@ -2,7 +2,7 @@
 exports.up = function(knex) {
   return knex.schema.createTable('reputations', table => {
     table.increments()
-    table.string('points')
+    table.integer('points')
     table.string('from')
     table.string('to')
     table.timestamps(true, true)

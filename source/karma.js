@@ -23,7 +23,12 @@ const karma = (bot, knex) => {
           from: user.id,
           to: message.author.id 
         })
-      await notificationsChannel.send(`<@${user.id}> reacted to <@${message.author.id}>'s message in the <#${message.channel.id}> channel (https://discord.com/channels/684009642984341525/${message.channel.id}/${message.id}) with the ${emoji.name} emoji. <@${message.author.id}> earned +1 point and now has a total of 0 points. `)
+      const rows = await knex('reputations')
+        .where('to', message.author.id)
+        .sum('points')
+      const count = rows.shift().sum
+      console.log("count", count)
+      await notificationsChannel.send(`<@${user.id}> reacted to <@${message.author.id}>'s message in the <#${message.channel.id}> channel (https://discord.com/channels/684009642984341525/${message.channel.id}/${message.id}) with the ${emoji.name} emoji. <@${message.author.id}> earned +1 point and now has a total of ${count} points. `)
     }
   })
 }
