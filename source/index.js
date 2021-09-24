@@ -5,6 +5,10 @@ const { Client, Permissions } = require('discord.js')
 const { Pool } = require('pg')
 const got = require('got')
 
+const knexConfig = require('./knexfile')['development']
+console.log('knexConfig', knexConfig)
+const knex = require('knex')(knexConfig)
+
 const INTERVAL = 5000
 const MILLISECONDS_BEFORE_OFFERING_HELP = 30000
 const MILLISECONDS_BEFORE_KICK_WARNING = 360000
@@ -549,4 +553,4 @@ const addTag = async member => {
   }
 }
 
-karma(bot)
+karma(bot, knex)
