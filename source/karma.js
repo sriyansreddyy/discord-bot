@@ -1,8 +1,3 @@
-// how do I show someone their reputation points?
-//  by adding a command in the short-term
-//  leaderboard
-//  awards
-
 const { MessageEmbed } = require('discord.js');
 
 const karma = (bot, knex) => {
