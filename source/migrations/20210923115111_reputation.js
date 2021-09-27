@@ -5,6 +5,7 @@ exports.up = function(knex) {
     table.integer('points')
     table.string('from')
     table.string('to')
+    table.string('messageId')
     table.timestamps(true, true)
   })
 }

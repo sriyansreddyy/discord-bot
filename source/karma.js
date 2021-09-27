@@ -1,6 +1,10 @@
 // what if someone removes the reaction then adds it a lot?
-// should I save the message in the database?
+// should I save the message in the database? - why?
 // should it be throttled?
+// how do I show someone their reputation points?
+//  by adding a command in the short-term
+//  leaderboard
+//  awards
 
 const karma = (bot, knex) => {
   console.log('knex', knex)
@@ -17,11 +21,22 @@ const karma = (bot, knex) => {
     if (user.id !== message.author.id 
       && user.id !== bot.user.id 
       && emoji.name === '💯') {
+
+      // const reputation = await
+
+      const rows1 = await knex('reputations')
+        .where({ from: user.id, messageId: message.id })
+      if (rows1.length > 0) {
+      await notificationsChannel.send(`<@${user.id}> reacted to <@${message.author.id}>'s message but no more points were given lol`)
+        return
+      }
+
       await knex('reputations')
         .insert({
           points: 1,
           from: user.id,
-          to: message.author.id 
+          to: message.author.id,
+          messageId: message.id
         })
       const rows = await knex('reputations')
         .where('to', message.author.id)
