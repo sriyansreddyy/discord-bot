@@ -1,12 +1,11 @@
 require('dotenv').config()
 const karma = require ('./karma')
 
-const { Client, Permissions } = require('discord.js')
+const { Client, Intents } = require('discord.js')
 const { Pool } = require('pg')
 const got = require('got')
 
 const knexConfig = require('./knexfile')['development']
-console.log('knexConfig', knexConfig)
 const knex = require('knex')(knexConfig)
 
 const INTERVAL = 5000
@@ -29,7 +28,8 @@ const {
 } = process.env
 
 const bot = new Client({ 
-  partials: ['MESSAGE', 'REACTION']
+  partials: ['MESSAGE', 'REACTION'],
+  intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES]
 })
 
 const pool = new Pool({
@@ -180,6 +180,15 @@ bot.on('ready', async () => {
       .filter(channel => channel.name?.startsWith(WELCOME_PREFIX))
       .forEach(offerHelpOrKick)
   }, INTERVAL)
+
+  const guild = bot.guilds.cache.get("868130358640668713")
+  console.log("guild", guild)
+  const commands = guild.commands
+  console.log("commands", commands)
+  // commands.create({
+  //   name: 'ping',
+  //   description: 'replies with pong'
+  // })
 
 })
 
@@ -553,4 +562,4 @@ const addTag = async member => {
   }
 }
 
-karma(bot, knex)
+// karma(bot, knex)
