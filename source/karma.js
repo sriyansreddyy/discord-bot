@@ -1,7 +1,7 @@
 const { MessageEmbed } = require('discord.js');
 
 const karma = (bot, knex) => {
-  const NOTIFICATIONS_CHANNEL_ID = '868130359106207844'
+  const { KARMA_NOTIFICATIONS_CHANNEL_ID } = process.env
 
   bot.on('messageReactionAdd', async (messageReaction, user) => {
     if (messageReaction.partial) {
@@ -10,7 +10,7 @@ const karma = (bot, knex) => {
     const { message, emoji } = messageReaction
     const notificationsChannel = await bot
       .channels
-      .fetch(NOTIFICATIONS_CHANNEL_ID)
+      .fetch(KARMA_NOTIFICATIONS_CHANNEL_ID)
     if (user.id !== message.author.id 
       && user.id !== bot.user.id 
       && emoji.name === '💜') {
