@@ -29,7 +29,13 @@ const {
 
 const bot = new Client({ 
   partials: ['MESSAGE', 'REACTION'],
-  intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.DIRECT_MESSAGES, Intents.FLAGS.GUILD_MESSAGE_REACTIONS]
+  intents: [
+    Intents.FLAGS.GUILDS,
+    Intents.FLAGS.GUILD_MESSAGES,
+    Intents.FLAGS.DIRECT_MESSAGES,
+    Intents.FLAGS.GUILD_MEMBERS,
+    Intents.FLAGS.GUILD_MESSAGE_REACTIONS
+  ]
 })
 
 const pool = new Pool({
@@ -201,7 +207,6 @@ bot.on('interactionCreate', async interaction => {
   const {commandName} = interaction
   if (commandName === 'karma') {
     // interaction.user.id
-    console.log(interaction.user.id)
     const rows = await knex('reputations')
       .where('to', interaction.user.id)
       .sum('points')
@@ -211,10 +216,6 @@ bot.on('interactionCreate', async interaction => {
       ephemeral: true
     })
   }
-
-  if (commandName === 'reputation') {
-  }
-  console.log(commandName)
 })
 
 bot.on('guildMemberRemove', async member => {
@@ -271,7 +272,8 @@ const findCurrentStep = async channel => {
 }
 
 const disableInput = async (channel, memberId) => {
-  await channel.overwritePermissions([
+  console.log("channel", channel)
+  await channel.permissionOverwrites.set([
     {
       id: EVERYONE_ROLE_ID,
       deny: ['VIEW_CHANNEL']
@@ -289,7 +291,7 @@ const disableInput = async (channel, memberId) => {
 }
 
 const enableInput = async (channel, memberId) => {
-  await channel.overwritePermissions([
+  await channel.permissionOverwrites.set([
     {
       id: EVERYONE_ROLE_ID,
       deny: ['VIEW_CHANNEL']
@@ -373,9 +375,10 @@ bot.on('message', async message => {
     member
   } = message
 
-  if (channel.type !== "text" || !channel.name.startsWith(WELCOME_PREFIX)) {
+  if (channel.type !== "GUILD_TEXT" || !channel.name.startsWith(WELCOME_PREFIX)) {
     return
   }
+
 
   const onboardee = extractOnboardeeIdFromChannelName(channel.name)
   const sender = author.id
@@ -397,7 +400,7 @@ bot.on('messageReactionAdd', async (messageReaction, user) => {
     emoji : { name: answer }
   } = messageReaction
 
-  if (channel.type !== "text" || !channel.name.startsWith(WELCOME_PREFIX) ) {
+  if (channel.type !== "GUILD_TEXT" || !channel.name.startsWith(WELCOME_PREFIX) ) {
     return
   }
   
