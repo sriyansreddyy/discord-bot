@@ -21,8 +21,6 @@ const karma = (bot, knex) => {
       && user.id !== bot.user.id 
       && emoji.name === '💯') {
 
-      const reputation = await
-
       const rows1 = await knex('reputations')
         .where({ from: user.id, messageId: message.id })
       if (rows1.length > 0) {
