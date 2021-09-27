@@ -13,7 +13,7 @@ const karma = (bot, knex) => {
       .fetch(NOTIFICATIONS_CHANNEL_ID)
     if (user.id !== message.author.id 
       && user.id !== bot.user.id 
-      && emoji.name === '💯') {
+      && emoji.name === '💜') {
 
       // const rows1 = await knex('reputations')
       //   .where({ from: user.id, messageId: message.id })
