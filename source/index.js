@@ -29,7 +29,7 @@ const {
 
 const bot = new Client({ 
   partials: ['MESSAGE', 'REACTION'],
-  intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES]
+  intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.DIRECT_MESSAGES, Intents.FLAGS.GUILD_MESSAGE_REACTIONS]
 })
 
 const pool = new Pool({
@@ -182,14 +182,39 @@ bot.on('ready', async () => {
   }, INTERVAL)
 
   const guild = bot.guilds.cache.get("868130358640668713")
-  console.log("guild", guild)
   const commands = guild.commands
-  console.log("commands", commands)
-  // commands.create({
-  //   name: 'ping',
-  //   description: 'replies with pong'
-  // })
+  commands.create({
+    name: 'karma',
+    description: 'Tells you how much karma you have'
+  })
+  commands.create({
+    name: 'leaderboard',
+    description: 'Tells you who has the most reputation'
+  })
 
+  // await knex('reputations')
+    
+})
+
+bot.on('interactionCreate', async interaction => {
+  if (!interaction.isCommand()) { return }
+  const {commandName} = interaction
+  if (commandName === 'karma') {
+    // interaction.user.id
+    console.log(interaction.user.id)
+    const rows = await knex('reputations')
+      .where('to', interaction.user.id)
+      .sum('points')
+    const count = rows.shift().sum || 0
+    interaction.reply({
+      content: `You have ${count} reputation. Just ${200 - count} more to unlock a T-shirt`,
+      ephemeral: true
+    })
+  }
+
+  if (commandName === 'reputation') {
+  }
+  console.log(commandName)
 })
 
 bot.on('guildMemberRemove', async member => {
@@ -562,4 +587,4 @@ const addTag = async member => {
   }
 }
 
-// karma(bot, knex)
+karma(bot, knex)
