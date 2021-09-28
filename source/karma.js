@@ -15,12 +15,12 @@ const karma = (bot, knex) => {
       && user.id !== bot.user.id 
       && emoji.name === '💜') {
 
-      // const rows1 = await knex('reputations')
-      //   .where({ from: user.id, messageId: message.id })
-      // if (rows1.length > 0) {
-      // await notificationsChannel.send(`<@${user.id}> reacted to <@${message.author.id}>'s message but no more points were given lol`)
-      //   return
-      // }
+      const rows1 = await knex('reputations')
+        .where({ from: user.id, messageId: message.id })
+      if (rows1.length > 0) {
+      await notificationsChannel.send(`<@${user.id}> reacted to <@${message.author.id}>'s message but no more points were given lol`)
+        return
+      }
 
       await knex('reputations')
         .insert({
@@ -33,7 +33,6 @@ const karma = (bot, knex) => {
         .where('to', message.author.id)
         .sum('points')
       const count = rows.shift().sum || 0 // should never be 0 since this code is only run in response to you getting some reputation in the first place lol
-      console.log("count", count)
       const exampleEmbed = new MessageEmbed()
         .setColor('#0099ff')
         .setAuthor('Scrimba', bot.user.displayAvatarURL(), 'https://discord.js.org')

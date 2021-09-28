@@ -5,7 +5,7 @@ const { Client, Intents } = require('discord.js')
 const { Pool } = require('pg')
 const got = require('got')
 
-const knexConfig = require('./knexfile')['development']
+const knexConfig = require('./knexfile')
 const knex = require('knex')(knexConfig)
 
 const INTERVAL = 5000
