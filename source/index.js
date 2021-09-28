@@ -206,7 +206,7 @@ bot.on('interactionCreate', async interaction => {
       .sum('points')
     const count = rows.shift().sum || 0
     interaction.reply({
-      content: `You have ${count} reputation. Just ${200 - count} more to unlock a T-shirt`,
+      content: `You have ${count} reputation. Just ${250 - count} more until you can request a hoodie.`,
       ephemeral: true
     })
   }
