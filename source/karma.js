@@ -46,7 +46,7 @@ const karma = (bot, knex) => {
         .setAuthor('Pumpkin from Scrimba', bot.user.displayAvatarURL(), 'https://discord.js.org')
         .setDescription(`Well done <@${message.author.id}>! <@${user.id}> reacted to your post [post](https://discord.com/channels/684009642984341525/${message.channel.id}/${message.id}) in <#${message.channel.id}> with 💜 which earned you a point.
 
-You now have ${count} karma!`)
+You now have ${count} karma! To see your karma anytime type \`/karma\``)
       await notificationsChannel.send({embeds: [exampleEmbed]})
     }
   })
