@@ -42,7 +42,7 @@ const karma = (bot, knex) => {
         .sum('points')
       const count = rows.shift().sum || 0 // should never be 0 since this code is only run in response to you getting some reputation in the first place lol
       const exampleEmbed = new MessageEmbed()
-        .setColor('#0099ff')
+        .setColor('#C580F2')
         .setAuthor('Pumpkin from Scrimba', bot.user.displayAvatarURL(), 'https://discord.js.org')
         .setDescription(`Well done <@${message.author.id}>! <@${user.id}> reacted to your post [post](https://discord.com/channels/684009642984341525/${message.channel.id}/${message.id}) in <#${message.channel.id}> with 💜 which earned you a point.
 
