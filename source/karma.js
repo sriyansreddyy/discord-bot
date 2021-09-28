@@ -25,7 +25,8 @@ const karma = (bot, knex) => {
       const rows1 = await knex('reputations')
         .where({ from: user.id, messageId: message.id })
       if (rows1.length > 0) {
-      await notificationsChannel.send(`<@${user.id}> reacted to <@${message.author.id}>'s message but no more points were given lol`)
+        // this specific user already voted on this specific
+        // post so this is no bueno!
         return
       }
 
