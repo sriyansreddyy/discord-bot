@@ -194,6 +194,10 @@ bot.on('ready', async () => {
     name: 'karma',
     description: 'Tells you how much karma you have'
   })
+  commands.create({
+    name: 'leaderboard',
+    description: 'How much karma '
+  })
 })
 
 bot.on('interactionCreate', async interaction => {
@@ -209,6 +213,23 @@ bot.on('interactionCreate', async interaction => {
       content: `You have ${count} reputation. Just ${250 - count} more until you can request a hoodie.`,
       ephemeral: true
     })
+    return
+  }
+
+  if (commandName === 'leaderboard') {
+    const rows = await knex('reputations')
+      .select('to')
+      .sum({ totalPoints: 'points' })
+      .groupBy('to')
+      .orderBy('totalPoints', 'DESC')
+    const leaderboardText =  rows.reduce((prev, current, currentIndex) => {
+      return prev += `${currentIndex + 1}. <@${current.to}> has ${current.totalPoints} points\n`
+    }, '')
+    interaction.reply({
+      content: `.: Leaderboard :. \n\n${leaderboardText}`,
+      ephemeral: true
+    })
+    return
   }
 })
 
