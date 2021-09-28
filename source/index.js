@@ -187,19 +187,13 @@ bot.on('ready', async () => {
       .forEach(offerHelpOrKick)
   }, INTERVAL)
 
-  const guild = bot.guilds.cache.get("868130358640668713")
+  // const guild = bot.guilds.cache.get("868130358640668713")
+  const guild = bot.guilds.cache.first()
   const commands = guild.commands
   commands.create({
     name: 'karma',
     description: 'Tells you how much karma you have'
   })
-  commands.create({
-    name: 'leaderboard',
-    description: 'Tells you who has the most reputation'
-  })
-
-  // await knex('reputations')
-    
 })
 
 bot.on('interactionCreate', async interaction => {
