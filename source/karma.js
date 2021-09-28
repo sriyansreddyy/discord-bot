@@ -8,6 +8,13 @@ const karma = (bot, knex) => {
       await messageReaction.fetch()
     }
     const { message, emoji } = messageReaction
+    const reactionChannel = await bot
+      .channels
+      .fetch(message.channelId)
+    console.log(reactionChannel.name)
+    if (!reactionChannel.name.endsWith("-help")) {
+      return
+    }
     const notificationsChannel = await bot
       .channels
       .fetch(KARMA_NOTIFICATIONS_CHANNEL_ID)
