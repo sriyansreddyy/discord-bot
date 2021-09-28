@@ -383,7 +383,7 @@ const processAnswer = async (
   await sendNextStep(currentStepIndex, channel, member)
 }
 
-bot.on('message', async message => {
+bot.on('messageCreate', async message => {
   const { 
     channel,
     author,
