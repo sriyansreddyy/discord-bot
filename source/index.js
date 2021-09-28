@@ -222,6 +222,7 @@ bot.on('interactionCreate', async interaction => {
       .sum({ totalPoints: 'points' })
       .groupBy('to')
       .orderBy('totalPoints', 'DESC')
+      .limit(20)
     const leaderboardText =  rows.reduce((prev, current, currentIndex) => {
       return prev += `${currentIndex + 1}. <@${current.to}> has ${current.totalPoints} points\n`
     }, '')
