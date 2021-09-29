@@ -19,21 +19,17 @@ const {
   CONVERT_KIT_FORM_ID
 } = process.env
 
-const initOnboarding = bot => {
-
-  const pool = new Pool({
-    connectionString: PG_URI
-  })
+module.exports = bot => {
 
   const steps = [
     {
-      question: `Meow 👋! Welcome to the Scrimba community! 
+      question: `Meow! Welcome to the Scrimba community! 
 
-I am Scrimba's mascot, Pumpkin, and I am here to lend you a helping paw.
+I am Scrimba's mascot, Pumpkin, and I am here to lend you a helping paw in joining Scrimba Discord community.
 
 Right now, you can only see a couple of channels 😢. 
 
-There are *tonne* more, which I will unlock for you once you answer some questsions.
+There are *tonne* more to see, which I will unlock for you once you answer some questsions.
 
 First, **what is your first name?**`,
       help: `it's been a minute, and I still don't know your name 👉🥺👈.
@@ -71,18 +67,18 @@ I will automatically detect when you've set a profile picture then send you the 
       processImmediately: true
     },
     {
-      shouldSkip: async member => {
-        return await findScrimbaUserByDiscordId(member.user.id)
-      },
       question: `Next, please take a moment to connect your Scrimba and Discord accounts: https://scrimba.com/discord/connect
 
 I will automatically detect when you click **Authorize** then send you the next step.`,
+      shouldSkip: async member => {
+        return await findScrimbaUserByDiscordId(member.user.id)
+      },
       help: `**Please take a moment to connect your Scrimba and Discord account**.
 
 If you don't have a Scrimba account yet, create a free account here: https://scrimba.com. 
 
 If you clicked **Authorize** but nothing happened, please ensure you are not logged in to a different Discord account in your web browser.`,
-      successMessage: 'Fantastik! 🇳🎉',
+      successMessage: 'Fantastik!',
       process: (answer, member, channel) => fetchScrimbaUser(member.id, channel),
       processImmediately: true,
     },
@@ -113,13 +109,18 @@ Looking forward to become a part of this epic/awesome/friendly community 🤩 �
 \`\`\`
 Once you've done that, come back here and click the ✅ emoji beneath to unlock the whole server.`,
       shouldSkip: async member => { 
-        // using shouldSkip like a preProcessor hook lol
+        // here we use shouldSkip like a preprocessor. You
+        // can think of it like a `beforeStepRun` hook
         await member.roles.add(UNLOCKED_INTRODUCTIONS_CHANNEL_ROLE_ID)
         return false
       },
       expectedReaction: '✅'
     }
   ]
+
+  const pool = new Pool({
+    connectionString: PG_URI
+  })
 
   const extractOnboardeeIdFromChannelName = channelName =>
     channelName.match(/_([^_]+$)/)[1]
@@ -143,8 +144,8 @@ Once you've done that, come back here and click the ✅ emoji beneath to unlock 
       .forEach(async channel => {
         const member = await getOnboardeeFromChannel(channel)
         if (!member) {
-          // they probably left the server
-          console.log('member left between restart, deleting channel')
+          // Onboardee left while the bot was
+          // offline/restarting so adiós!
           await cleanupChannel(channel)
           return
         }
@@ -156,7 +157,6 @@ Once you've done that, come back here and click the ✅ emoji beneath to unlock 
   }
 
   bot.on('ready', async () => {
-    console.log(`Logged in as ${bot.user.id}!`)
     await cleanup()
     setInterval(() => {
       bot
@@ -289,6 +289,7 @@ Once you've done that, come back here and click the ✅ emoji beneath to unlock 
         await processAnswer(nextStep, currentStepIndex, channel, member, '')
       }
     } else {
+      // no more steps? onboarding complete!
       await assignProMemberRole(member)
       await addTag(member)
       await assignRegularMemberRole(member)
@@ -326,7 +327,6 @@ Once you've done that, come back here and click the ✅ emoji beneath to unlock 
     if (channel.type !== "GUILD_TEXT" || !channel.name.startsWith(WELCOME_PREFIX)) {
       return
     }
-
 
     const onboardee = extractOnboardeeIdFromChannelName(channel.name)
     const sender = author.id
@@ -408,6 +408,7 @@ We're excited to have you here! `)
 
   const findScrimbaUserByDiscordId = async (discordId) => {
     try {
+      // TODO should use Knex for consistency
       const { rows }  = await pool
         .query(`SELECT 
               u.id, 
@@ -419,8 +420,8 @@ We're excited to have you here! `)
       const user = rows[0]
       return user
     } catch (error) {
-      console.error(error)
-      process.exit(1)
+      console.error("error findScrimbaUserByDiscordId", error)
+      // process.exit(1)
     }
   }
 
@@ -431,6 +432,7 @@ We're excited to have you here! `)
         const user = await findScrimbaUserByDiscordId(discordId)
         if (user) {
           if (user.active === true) {
+            // TODO use ./source/assets/pop_that_bottle.gif
             await channel.send("ℹ️ Oh! You are a PRO member. I will add a special badge to your profile! https://media.giphy.com/media/g9582DNuQppxC/giphy.gif",)
           }
           await enableInput(channel, discordId)
@@ -441,12 +443,12 @@ We're excited to have you here! `)
     })
   }
 
-
   const cleanupChannel = channel => channel.delete()
 
   const offerHelpOrKick = async channel => {
-    // might need to check if channel exists(might have been
-    // deleted within a few seconds)
+    // sometimes channel no longer exists when this func 
+    // is run. Not sure why. TODO check if channel exists
+    // before referencing it
     const { step, botMessage } = await findCurrentStep(channel)
     const now = new Date()
     const millisecondsSinceQuestion = now - botMessage.createdAt
@@ -531,4 +533,3 @@ If, in a few minutes, you're still on this step, I will softly remove you from t
     }
   }
 }
-module.exports = initOnboarding
