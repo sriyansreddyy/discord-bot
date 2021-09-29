@@ -1,10 +1,12 @@
-const { MessageEmbed } = require('discord.js');
+const knexConfig = require('./knexfile')
+const knex = require('knex')(knexConfig)
+const { MessageEmbed } = require('discord.js')
 
-const karma = (bot, knex) => {
-  const { KARMA_NOTIFICATIONS_CHANNEL_ID } = process.env
+const { KARMA_NOTIFICATIONS_CHANNEL_ID } = process.env
+
+const karma = bot => {
 
   bot.on('ready', () => {
-    console.log('karma ready')
     const guild = bot.guilds.cache.get("868130358640668713")
     const commands = guild.commands
     commands.create({
