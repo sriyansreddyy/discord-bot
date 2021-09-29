@@ -84,7 +84,7 @@ Write your first name below and press ENTER to continue.`,
 Please take a moment to set a Discord profile picture - it makes the communication feel more personal.
 
 I will automatically detect when you've set a profile picture then send you the next step.`,
-    attachment: './source/avatar_example.png',
+    attachment: './source/assets/avatar_example.png',
     help: "**Please take a moment to set a Discord profile piture**. Not sure how? Check out this article, https://www.businessinsider.com/how-to-change-discord-picture?r=US&IR=T",
     shouldSkip: member => member.user.avatar,
     process: async (answer, member, channel) => {
