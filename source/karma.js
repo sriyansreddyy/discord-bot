@@ -7,7 +7,7 @@ const { KARMA_NOTIFICATIONS_CHANNEL_ID } = process.env
 const karma = bot => {
 
   bot.on('ready', () => {
-    const guild = bot.guilds.cache.get("868130358640668713")
+    const guild = bot.guilds.cache.first()
     const commands = guild.commands
     commands.create({
       name: 'karma',
