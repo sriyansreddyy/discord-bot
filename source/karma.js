@@ -3,6 +3,36 @@ const { MessageEmbed } = require('discord.js');
 const karma = (bot, knex) => {
   const { KARMA_NOTIFICATIONS_CHANNEL_ID } = process.env
 
+  bot.on('ready', () => {
+    console.log('karma ready')
+    const guild = bot.guilds.cache.get("868130358640668713")
+    const commands = guild.commands
+    commands.create({
+      name: 'karma',
+      description: 'Tells you how much karma you have'
+    })
+    commands.create({
+      name: 'leaderboard',
+      description: 'Tells you who has the most reputation'
+    })
+  })
+
+  bot.on('interactionCreate', async interaction => {
+    if (!interaction.isCommand()) { return }
+    const {commandName} = interaction
+    if (commandName === 'karma') {
+      // interaction.user.id
+      const rows = await knex('reputations')
+        .where('to', interaction.user.id)
+        .sum('points')
+      const count = rows.shift().sum || 0
+      interaction.reply({
+        content: `You have ${count} reputation. Just ${200 - count} more to unlock a T-shirt`,
+        ephemeral: true
+      })
+    }
+  })
+
   bot.on('messageReactionAdd', async (messageReaction, user) => {
     if (messageReaction.partial) {
       await messageReaction.fetch()

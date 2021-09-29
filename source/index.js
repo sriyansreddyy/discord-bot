@@ -1,10 +1,9 @@
 require('dotenv').config()
-const karma = require ('./karma')
 
 const { Client, Intents } = require('discord.js')
 const { Pool } = require('pg')
 const got = require('got')
-
+const initKarma = require ('./karma')
 const knexConfig = require('./knexfile')
 const knex = require('knex')(knexConfig)
 
@@ -37,6 +36,7 @@ const bot = new Client({
     Intents.FLAGS.GUILD_MESSAGE_REACTIONS
   ]
 })
+initKarma(bot, knex)
 
 const pool = new Pool({
   connectionString: PG_URI
@@ -176,9 +176,7 @@ const cleanup = async () => {
 
 bot.on('ready', async () => {
   console.log(`Logged in as ${bot.user.id}!`)
-
   await cleanup()
-
   setInterval(() => {
     bot
       .channels
@@ -186,36 +184,6 @@ bot.on('ready', async () => {
       .filter(channel => channel.name?.startsWith(WELCOME_PREFIX))
       .forEach(offerHelpOrKick)
   }, INTERVAL)
-
-  const guild = bot.guilds.cache.get("868130358640668713")
-  const commands = guild.commands
-  commands.create({
-    name: 'karma',
-    description: 'Tells you how much karma you have'
-  })
-  commands.create({
-    name: 'leaderboard',
-    description: 'Tells you who has the most reputation'
-  })
-
-  // await knex('reputations')
-    
-})
-
-bot.on('interactionCreate', async interaction => {
-  if (!interaction.isCommand()) { return }
-  const {commandName} = interaction
-  if (commandName === 'karma') {
-    // interaction.user.id
-    const rows = await knex('reputations')
-      .where('to', interaction.user.id)
-      .sum('points')
-    const count = rows.shift().sum || 0
-    interaction.reply({
-      content: `You have ${count} reputation. Just ${200 - count} more to unlock a T-shirt`,
-      ephemeral: true
-    })
-  }
 })
 
 bot.on('guildMemberRemove', async member => {
@@ -590,4 +558,3 @@ const addTag = async member => {
   }
 }
 
-karma(bot, knex)
