@@ -1,4 +1,3 @@
-
 exports.up = function(knex) {
   return knex.schema.createTable('reputations', table => {
     table.increments()
