@@ -29,11 +29,18 @@ This section outlines how to run the Scrimba Discord Onboarding bot locally for 
   - Head to the [Discord Developer Portal](https://discord.com/developers/applications) and find the bot you created in step one. **Copy** the token
   - Update .env:
     ```
+    DISCORD_BOT_TOKEN=
+    PG_URI=
     ONBOARDING_CATEGORY_ID=
     EVERYONE_ROLE_ID=
     REGULAR_MEMBER_ROLE_ID=
-    DISCORD_BOT_TOKEN=
-    PG_URI=
+    PRO_ROLE_ID=
+    CONVERT_KIT_API_KEY=
+    CONVERT_KIT_API_SECRET=
+    CONVERT_KIT_TAG_ID=
+    CONVERT_KIT_FORM_ID=
+    UNLOCKED_INTRODUCTIONS_CHANNEL_ROLE_ID=
+    KARMA_NOTIFICATIONS_CHANNEL_ID=
     ```
 - Step three, run the bot 
   - Run `npm install`
